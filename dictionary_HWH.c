@@ -22,7 +22,7 @@ long long Hash (char* str)
 HashTable** TextInput (long long text_len)
 {
     int hash = 0;
-    HashTable** buf = calloc(999, sizeof(HashTable*));
+    HashTable** buf = calloc(1000, sizeof(HashTable*));
     char* temp_str = calloc (text_len + 1, sizeof(char));
 
     int str_len = 0;
