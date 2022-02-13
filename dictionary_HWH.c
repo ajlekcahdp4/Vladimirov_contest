@@ -71,6 +71,7 @@ char** WordsInput (int N)
 int NumOfWord (HashTable** text, char* word)
 {
     int N = 0;
+    
     int word_hash = Hash (word);
     HashTable* cur_node = text[word_hash];
     if (cur_node == 0)
