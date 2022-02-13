@@ -5,6 +5,7 @@ struct node_t* CreateNode (struct node_t* last, int data)
 {
     last->next = calloc (1, sizeof(struct node_t));
     last->next->data = data;
+    return last->next;
 }
 
 void DeleteList (struct node_t* top)
@@ -17,5 +18,5 @@ void DeleteList (struct node_t* top)
         free(cur_node);
         cur_node = next_node;
     }
-    free(cur_node);
+    //free(cur_node);
 }

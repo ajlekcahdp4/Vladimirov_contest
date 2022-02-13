@@ -19,11 +19,11 @@ long long Hash (char* str)
     return hash;
 }
 
-HashTable** TextInput (long long text_len)
+HashTable** TextInput (long long text_len) //segfault на больших текстах
 {
     int hash = 0;
     HashTable** buf = calloc(1000, sizeof(HashTable*));
-    char* temp_str = calloc (text_len + 1, sizeof(char));
+    char* temp_str = calloc (100, sizeof(char));
 
     int str_len = 0;
     for (int len_trav = 0; len_trav < text_len; len_trav++)
@@ -71,7 +71,7 @@ char** WordsInput (int N)
 int NumOfWord (HashTable** text, char* word)
 {
     int N = 0;
-    
+
     int word_hash = Hash (word);
     HashTable* cur_node = text[word_hash];
     if (cur_node == 0)
@@ -129,14 +129,12 @@ int main ()
 {
     //Приём данных==========================================
     int N = 0;
-
     long long text_len = 0;
     HashTable** buf = 0;
     char** words = 0;
     scanf("%d", &N);
     scanf("%lld", &text_len);
-
-    buf = TextInput (text_len);    
+    buf = TextInput (text_len); 
     words = WordsInput (N);
     //Приём данных окончен==================================
     for (int i = 0; i < N; i++)
