@@ -14,16 +14,16 @@ long long Hash (char* str)
     long long hash = 0;
     int len = strlen(str);
     for (int i = 0; i < len; i++)
-        hash += str[i];
+        hash += i*str[i];
     hash = hash % 1000;
     return hash;
 }
 
 HashTable** TextInput (long long text_len)
 {
+    int hash = 0;
     HashTable** buf = calloc(999, sizeof(HashTable*));
     char* temp_str = calloc (text_len + 1, sizeof(char));
-
 
     int str_len = 0;
     for (int len_trav = 0; len_trav < text_len; len_trav++)
@@ -31,7 +31,7 @@ HashTable** TextInput (long long text_len)
         scanf("%s", temp_str);
         str_len = strlen (temp_str);
 
-        int hash = Hash (temp_str);
+        hash = Hash (temp_str);
         if (buf[hash] == 0)
         {
             buf[hash] = calloc (1, sizeof(HashTable));
@@ -57,8 +57,9 @@ HashTable** TextInput (long long text_len)
 char** WordsInput (int N)
 {
     int words_len = 0;
-    scanf("%d", &words_len);
     char** words = calloc (N, sizeof(char*));
+
+    scanf("%d", &words_len);
     for (int i = 0; i < N; i++)
     {
         words[i] = calloc (words_len, sizeof(char));
@@ -67,6 +68,24 @@ char** WordsInput (int N)
     return words;
 }
 
+int NumOfWord (HashTable** text, char* word)
+{
+    int N = 0;
+    int word_hash = Hash (word);
+    HashTable* cur_node = text[word_hash];
+    if (cur_node == 0)
+        return 0;
+    while (cur_node->next != 0)
+    {
+        if (strcmp(word, cur_node->word) == 0)
+            N += 1;
+        cur_node = cur_node->next;
+    }
+    if (strcmp(word, cur_node->word) == 0)
+        N += 1;
+    cur_node = cur_node->next;
+    return N;
+}
 
 void DeleteList (HashTable* top)
 {
@@ -109,18 +128,18 @@ int main ()
 {
     //Приём данных==========================================
     int N = 0;
-    scanf("%d", &N);
 
     long long text_len = 0;
+    HashTable** buf = 0;
+    char** words = 0;
+    scanf("%d", &N);
     scanf("%lld", &text_len);
 
-    HashTable** buf = TextInput (text_len);    
-    char** words = WordsInput (N);
+    buf = TextInput (text_len);    
+    words = WordsInput (N);
     //Приём данных окончен==================================
-
-
-    //final=================================================
+    for (int i = 0; i < N; i++)
+        printf ("%d ", NumOfWord(buf, words[i]));
     End (buf, words, N);
-
     return 0;
 }
