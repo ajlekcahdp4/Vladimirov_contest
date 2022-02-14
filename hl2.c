@@ -11,7 +11,7 @@ int PowTwo (int N)
         return 1;
     return 0;
 }
-int loop_len(struct node_t *top)
+int loop_len(struct node_t* top)
 {
     int len = 0;
     int N = 0;
@@ -46,7 +46,6 @@ int main ()
     CreateNode(top->next->next, 3);
     top->next->next->next = top;
     printf("%d\n", loop_len(top));
-    DeleteList (top);
     return 0;
 }
 
