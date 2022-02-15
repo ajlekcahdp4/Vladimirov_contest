@@ -1,20 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-
-
-typedef struct node {
-    char* word;
-    struct node* next;
-}node;
-
-typedef struct Hashtable {
-    node** lists_ar;
-    size_t size;
-    size_t inserts;
-    unsigned long long (*hash_func)(const char*);
-} Hashtable;
+#include "hashtable/hashtable.h"
 
 
 
@@ -24,6 +11,7 @@ int ReadWord (char* temp_str)
     int i = 0;
     while (c == ' ' || c == '\n' || c == '\r')
         c = getchar();
+
     while (c != ' ' && c != '\n' && c != '\r')
     {
         temp_str[i] = c;
@@ -34,26 +22,10 @@ int ReadWord (char* temp_str)
     return strlen (temp_str);
 }   
 
-unsigned long long Hash (const char* str)
-{
-    unsigned long long hash = 0;
-    int c = 0;
-    while ((c = *str++) != 0)
-        hash = (hash << 5) + (hash << 16) - hash  + c;
-    return hash % 1000;
-}
-
-Hashtable* HashTableInit (size_t size, unsigned long long (*Hash)(const char*))
-{
-    Hashtable* HashT = calloc (1, sizeof(Hashtable));
-    HashT->size = size;
-    HashT->lists_ar = calloc (HashT->size, sizeof(node*));
-    HashT->hash_func = Hash;
-    return HashT;
-}
 
 
-void TextInput (Hashtable* HashT, long long text_len) //segfault на больших текстах
+
+void TextInput (struct Hashtable* HashT, long long text_len) //segfault на больших текстах
 {
     int hash = 0;
     char* temp_str = calloc (100, sizeof(char));
@@ -74,6 +46,8 @@ void TextInput (Hashtable* HashT, long long text_len) //segfault на больш
         }
         else
         {
+            if (HashT->inserts / HashT->size >= 0.7)
+                HashT = HashTableResize (HashT);
             node* cur = HashT->lists_ar[hash];
             while (cur->next != 0)
                 cur = cur->next;
@@ -123,20 +97,7 @@ int NumOfWord (node** text, char* word)
     return N;
 }
 
-void DeleteList (node* top)
-{
-    node* cur_node = top;
-    node* next_node = top;
-    while (cur_node->next != 0)
-    {
-        next_node = cur_node->next;
-        free(cur_node->word);
-        free(cur_node);
-        cur_node = next_node;
-    }
-    free(cur_node->word);
-    free(cur_node);
-}
+
 
 
 void End (node** buf, char** words, int N)
@@ -176,6 +137,7 @@ int main ()
     //======================================================
     for (int i = 0; i < N; i++)
         printf ("%d ", NumOfWord(HashT->lists_ar, words[i]));
+    putchar('\n');
     End (HashT->lists_ar, words, N);
     return 0;
 }
