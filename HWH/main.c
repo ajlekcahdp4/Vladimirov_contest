@@ -1,49 +1,57 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "hashtable/hashtable.h"
 
 
-typedef struct HashTable {
-    char* word;
-    struct HashTable* next;
-}HashTable;
 
-
-long long Hash (char* str)
+int ReadWord (char* temp_str)
 {
-    long long hash = 0;
-    int len = strlen(str);
-    for (int i = 0; i < len; i++)
-        hash += i*str[i];
-    hash = hash % 1000;
-    return hash;
-}
+    char c = getchar();
+    int i = 0;
+    while (c == ' ' || c == '\n' || c == '\r')
+        c = getchar();
 
-HashTable** TextInput (long long text_len) //segfault на больших текстах
+    while (c != ' ' && c != '\n' && c != '\r')
+    {
+        temp_str[i] = c;
+        i++;
+        c = getchar();
+    }
+    temp_str[i] = '\0';
+    return strlen (temp_str);
+}   
+
+
+
+
+void TextInput (struct Hashtable* HashT, long long text_len) //segfault на больших текстах
 {
     int hash = 0;
-    HashTable** buf = calloc(1000, sizeof(HashTable*));
     char* temp_str = calloc (100, sizeof(char));
 
     int str_len = 0;
     for (int len_trav = 0; len_trav < text_len; len_trav++)
     {
-        scanf("%s", temp_str);
+        ReadWord (temp_str);
         str_len = strlen (temp_str);
 
-        hash = Hash (temp_str);
-        if (buf[hash] == 0)
+        hash = Hash (temp_str) % HashT->size;
+        if (HashT->lists_ar[hash] == 0)
         {
-            buf[hash] = calloc (1, sizeof(HashTable));
-            buf[hash]->word = calloc (str_len + 1, sizeof(char));
-            memcpy(buf[hash]->word, temp_str, str_len);
+
+            HashT->lists_ar[hash] = calloc (1, sizeof(node));
+            HashT->lists_ar[hash]->word = calloc (str_len + 1, sizeof(char));
+            memcpy(HashT->lists_ar[hash]->word, temp_str, str_len);
         }
         else
         {
-            HashTable* cur = buf[hash];
+            if (HashT->inserts / HashT->size >= 0.7)
+                HashT = HashTableResize (HashT);
+            node* cur = HashT->lists_ar[hash];
             while (cur->next != 0)
                 cur = cur->next;
-            cur->next = calloc (1, sizeof (HashTable));
+            cur->next = calloc (1, sizeof (node));
             cur = cur->next;
             cur->word = calloc (str_len + 1, sizeof(char));
             memcpy(cur->word, temp_str, str_len);
@@ -51,8 +59,9 @@ HashTable** TextInput (long long text_len) //segfault на больших тек
         len_trav += str_len;
     }
     free (temp_str);
-    return buf;
 }
+
+
 
 char** WordsInput (int N)
 {
@@ -68,12 +77,12 @@ char** WordsInput (int N)
     return words;
 }
 
-int NumOfWord (HashTable** text, char* word)
+int NumOfWord (node** text, char* word)
 {
     int N = 0;
 
     int word_hash = Hash (word);
-    HashTable* cur_node = text[word_hash];
+    node* cur_node = text[word_hash];
     if (cur_node == 0)
         return 0;
     while (cur_node->next != 0)
@@ -88,23 +97,10 @@ int NumOfWord (HashTable** text, char* word)
     return N;
 }
 
-void DeleteList (HashTable* top)
-{
-    HashTable* cur_node = top;
-    HashTable* next_node = top;
-    while (cur_node->next != 0)
-    {
-        next_node = cur_node->next;
-        free(cur_node->word);
-        free(cur_node);
-        cur_node = next_node;
-    }
-    free(cur_node->word);
-    free(cur_node);
-}
 
 
-void End (HashTable** buf, char** words, int N)
+
+void End (node** buf, char** words, int N)
 {
     for (int i = 0; i < 999; i++)
     {
@@ -127,18 +123,21 @@ void End (HashTable** buf, char** words, int N)
 
 int main ()
 {
-    //Приём данных==========================================
     int N = 0;
     long long text_len = 0;
-    HashTable** buf = 0;
+    Hashtable* HashT = 0;
     char** words = 0;
+
     scanf("%d", &N);
     scanf("%lld", &text_len);
-    buf = TextInput (text_len); 
+    HashT = HashTableInit (1000, Hash);
+    TextInput (HashT, text_len); 
     words = WordsInput (N);
-    //Приём данных окончен==================================
+
+    //======================================================
     for (int i = 0; i < N; i++)
-        printf ("%d ", NumOfWord(buf, words[i]));
-    End (buf, words, N);
+        printf ("%d ", NumOfWord(HashT->lists_ar, words[i]));
+    putchar('\n');
+    End (HashT->lists_ar, words, N);
     return 0;
 }
