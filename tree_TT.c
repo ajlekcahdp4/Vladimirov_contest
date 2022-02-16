@@ -90,55 +90,69 @@ int PosInInorder (int* inorder, int val)
     return pos;
 }
 
-Node_t* FillTree (Node_t* node, int N, int* inorder, int* preorder, int* ip)
+Node_t* FillTree (Node_t* node, int N, int* inorder, int* preorder, int* ip, int left_bord, int right_bord) 
+//!Можно хранить граничные значения, между которыми в инордере мы находимся
 {
     Node_t* cur = node;
-    int last_pos = 0;
     int cur_pos = 0;
     int next_pos = 0;
     if (cur == 0)
         cur = TreeInit(preorder[*ip]);
-    if (*ip >= 1)
-        last_pos = PosInInorder (inorder, preorder[*ip - 1]);
-    cur_pos = PosInInorder(inorder, preorder[*ip]);
-    next_pos = PosInInorder(inorder, preorder[*ip + 1]);
-    if (*ip + 1 < N && next_pos < cur_pos )//ищем позицию преордера в инордере и запускаем рекурсию
-    {
+
+    cur_pos = PosInInorder (inorder, preorder[*ip]);
+    
+    if (*ip < N - 1)
         *ip += 1;
-        cur->l = FillTree (cur->l, N, inorder, preorder, ip);
-    }
-    //Загоняем в правую ветку
-    if (*ip + 1 < N && fabs(next_pos - cur_pos) < fabs (cur_pos - last_pos))
+
+    next_pos = PosInInorder (inorder , preorder[*ip]);
+    if (next_pos >= left_bord && next_pos < cur_pos)
     {
-        *ip += 1;
-        cur->r = FillTree (cur->r, N, inorder, preorder, ip);
+        cur->l = FillTree (cur->l, N, inorder, preorder, ip, left_bord, cur_pos);
     }
+    if (*ip < N)
+        next_pos = PosInInorder (inorder , preorder[*ip]);
+
+    if (next_pos > cur_pos && next_pos <= right_bord)
+    {
+        cur->r = FillTree (cur->r, N, inorder, preorder, ip, cur_pos, right_bord);
+    }
+    /*В ином случае просто выходим из этой итерации рекурсии*/
+
+
+
     return cur;
 }
 
 
-void NormTreePrint (Node_t* top)
+void NormTreePrint (Node_t* top, int N, int* cnt)
 {
     assert(top);
     printf("1 ");
+    *cnt += 1;
     if (top->l != 0)
     {
-        NormTreePrint (top->l);
+        NormTreePrint (top->l, N, cnt);
     }
     else
     {
         printf("0 ");
+        *cnt += 1;
     }
 
     if(top->r != 0)
     {
-        NormTreePrint(top->r);
+        NormTreePrint(top->r, N, cnt);
     }
     else
     {
-        printf("0 ");
+        if (*cnt < 2*N)
+        {
+            *cnt += 1;
+            printf("0 ");
+        }
     }
 }
+
 
 int main ()
 {
@@ -149,6 +163,7 @@ int main ()
     int* preorder = 0;
     Node_t* top = 0;
     int ip = 0;
+    int cnt = 0;
 
     scanf ("%d", &tree_size);
 
@@ -162,14 +177,17 @@ int main ()
     //input=end===========================================
     
     
-    top = FillTree (top, tree_size, inorder, preorder, &ip);
-
-
+    top = FillTree (top, tree_size, inorder, preorder, &ip, 0, tree_size - 1);
+    //TreePrint (tree_size, top, "1");
+    
     printf("%d\n", tree_size);
-    NormTreePrint (top);
-    printf("\n");
+
+    NormTreePrint (top, tree_size, &cnt);
+
+    putchar('\n');
     for (int i = 0; i < tree_size; i++)
         printf("%d ", preorder[i]);
+    putchar('\n');
 
     DeleteList (top);
     free (inorder);
