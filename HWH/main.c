@@ -25,9 +25,8 @@ int ReadWord (char* temp_str)
 
 
 
-void TextInput (struct Hashtable* HashT, long long text_len) //segfault на больших текстах
+void TextInput (struct Hashtable* HashT, long long text_len)
 {
-    int hash = 0;
     char* temp_str = calloc (100, sizeof(char));
 
     int str_len = 0;
@@ -35,27 +34,7 @@ void TextInput (struct Hashtable* HashT, long long text_len) //segfault на б�
     {
         ReadWord (temp_str);
         str_len = strlen (temp_str);
-
-        hash = Hash (temp_str) % HashT->size;
-        if (HashT->lists_ar[hash] == 0)
-        {
-
-            HashT->lists_ar[hash] = calloc (1, sizeof(node));
-            HashT->lists_ar[hash]->word = calloc (str_len + 1, sizeof(char));
-            memcpy(HashT->lists_ar[hash]->word, temp_str, str_len);
-        }
-        else
-        {
-            if (HashT->inserts / HashT->size >= 0.7)
-                HashT = HashTableResize (HashT);
-            node* cur = HashT->lists_ar[hash];
-            while (cur->next != 0)
-                cur = cur->next;
-            cur->next = calloc (1, sizeof (node));
-            cur = cur->next;
-            cur->word = calloc (str_len + 1, sizeof(char));
-            memcpy(cur->word, temp_str, str_len);
-        }
+        HashtableInsert (HashT, temp_str);
         len_trav += str_len;
     }
     free (temp_str);
@@ -77,41 +56,12 @@ char** WordsInput (int N)
     return words;
 }
 
-int NumOfWord (node** text, char* word)
+
+
+
+void End (struct Hashtable* HashT, char** words, int N)
 {
-    int N = 0;
-
-    int word_hash = Hash (word);
-    node* cur_node = text[word_hash];
-    if (cur_node == 0)
-        return 0;
-    while (cur_node->next != 0)
-    {
-        if (strcmp(word, cur_node->word) == 0)
-            N += 1;
-        cur_node = cur_node->next;
-    }
-    if (strcmp(word, cur_node->word) == 0)
-        N += 1;
-    cur_node = cur_node->next;
-    return N;
-}
-
-
-
-
-void End (node** buf, char** words, int N)
-{
-    for (int i = 0; i < 999; i++)
-    {
-        if (buf[i] != 0)
-        {
-            DeleteList (buf[i]);
-        }
-    }
-    free(buf);
-
-
+    DeleteHastable (HashT);
     for (int i = 0; i < N; i++)
     {
         if (words[i] != 0)
@@ -125,7 +75,7 @@ int main ()
 {
     int N = 0;
     long long text_len = 0;
-    Hashtable* HashT = 0;
+    struct Hashtable* HashT = 0;
     char** words = 0;
 
     scanf("%d", &N);
@@ -136,8 +86,8 @@ int main ()
 
     //======================================================
     for (int i = 0; i < N; i++)
-        printf ("%d ", NumOfWord(HashT->lists_ar, words[i]));
+        printf ("%d ", NumOfWord(HashT, words[i]));
     putchar('\n');
-    End (HashT->lists_ar, words, N);
+    End (HashT, words, N);
     return 0;
 }

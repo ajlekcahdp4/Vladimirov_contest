@@ -1,19 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-typedef struct node {
-    char* word;
-    struct node* next;
-}node;
-
-typedef struct Hashtable {
-    node** lists_ar;
-    size_t size;
-    size_t inserts;
-    unsigned long long (*hash_func)(const char*);
-} Hashtable;
-
+struct node;
+struct Hashtable;
+//opaque data type
 
 unsigned long long Hash (const char* str);
-Hashtable* HashTableInit (size_t size, unsigned long long (*Hash)(const char*));
-void DeleteList (node* top);
-Hashtable* HashTableResize (Hashtable* Hash_T);
+struct Hashtable* HashTableInit (size_t size, unsigned long long (*Hash)(const char*));
+void DeleteHastable (struct Hashtable* HashT);
+void DeleteList (struct node* top);
+struct Hashtable* HashTableResize (struct Hashtable* Hash_T);
+struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word);
+int NumOfWord (struct Hashtable* HashT, char* word);
