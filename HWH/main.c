@@ -83,10 +83,6 @@ int main ()
     HashT = HashTableInit (10, Hash);
     TextInput (HashT, text_len); 
     words = WordsInput (N);
-    
-
-    
-    HashT = HashTableResize (HashT);
 
     //======================================================
     for (int i = 0; i < N; i++)
