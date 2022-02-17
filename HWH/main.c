@@ -80,9 +80,13 @@ int main ()
 
     scanf("%d", &N);
     scanf("%lld", &text_len);
-    HashT = HashTableInit (1000, Hash);
+    HashT = HashTableInit (10, Hash);
     TextInput (HashT, text_len); 
     words = WordsInput (N);
+    
+
+    
+    HashT = HashTableResize (HashT);
 
     //======================================================
     for (int i = 0; i < N; i++)

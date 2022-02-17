@@ -1,8 +1,8 @@
 CC = gcc
-CFLAGS = -Wall -Werror -Wextra
+CFLAGS = -Wall -Werror -Wextra -g
 all: HWH
 HWH: main HT
-	$(CC) $(CFLAGS) -g main.o hashtable.o -o HWH.out
+	$(CC) $(CFLAGS) main.o hashtable.o -o HWH.out
 main:
 	$(CC) $(CFLAGS) -c main.c
 HT:
