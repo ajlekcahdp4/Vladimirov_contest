@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "hashtable/hashtable.h"
 
 
@@ -28,6 +29,7 @@ int ReadWord (char* temp_str)
 void TextInput (struct Hashtable* HashT, long long text_len)
 {
     char* temp_str = calloc (100, sizeof(char));
+    assert(temp_str);
 
     int str_len = 0;
     for (int len_trav = 0; len_trav < text_len; len_trav++)
@@ -51,7 +53,7 @@ char** WordsInput (int N)
     for (int i = 0; i < N; i++)
     {
         words[i] = calloc (words_len, sizeof(char));
-        scanf("%s", words[i]);
+        ReadWord (words[i]);
     }
     return words;
 }
@@ -73,13 +75,14 @@ void End (struct Hashtable* HashT, char** words, int N)
 
 int main ()
 {
-    int N = 0;
-    long long text_len = 0;
+    int N                   = 0;
+    long long text_len      = 0;
     struct Hashtable* HashT = 0;
-    char** words = 0;
+    char** words            = 0;
 
-    scanf("%d", &N);
-    scanf("%lld", &text_len);
+    assert(scanf("%d", &N));
+    
+    assert(scanf("%lld", &text_len));
     HashT = HashTableInit (10, Hash);
     TextInput (HashT, text_len); 
     words = WordsInput (N);

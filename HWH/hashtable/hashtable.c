@@ -30,8 +30,10 @@ unsigned long long Hash (const char* str)
 struct Hashtable* HashTableInit (size_t size, unsigned long long (*Hash)(const char*))
 {
     struct Hashtable* HashT = calloc (1, sizeof(struct Hashtable));
+    assert (HashT);
     HashT->size = size;
     HashT->lists_ar = calloc (HashT->size, sizeof(struct node*));
+    assert(HashT);
     HashT->hash_func = Hash;
     return HashT;
 }
@@ -45,6 +47,9 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
         HashT->lists_ar[hash] = calloc (1, sizeof(struct node));
         HashT->lists_ar[hash]->next = calloc (1, sizeof (struct node));
         HashT->lists_ar[hash]->next->word = calloc (str_len + 1, sizeof(char));
+        assert (HashT->lists_ar[hash]);
+        assert (HashT->lists_ar[hash]->next);
+        assert(HashT->lists_ar[hash]->next->word);
         memcpy(HashT->lists_ar[hash]->next->word, word, str_len);
     }
     else
@@ -56,8 +61,10 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
         while (cur->next != 0)
             cur = cur->next;
         cur->next = calloc (1, sizeof (struct node));
+        assert(cur->next);
         cur = cur->next;
         cur->word = calloc (str_len + 1, sizeof(char));
+        assert(cur->word);
         assert (cur->word);
         
         memcpy(cur->word, word, str_len);
