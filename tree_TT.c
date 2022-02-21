@@ -72,7 +72,7 @@ void TreePrint (int size, Node_t* top, char* str)
     }
 }
 
-void DeleteList (Node_t* top)
+void DeleteTree (Node_t* top)
 {
     assert(top);
     if (top->l != 0)
@@ -189,7 +189,7 @@ int main ()
         printf("%d ", preorder[i]);
     putchar('\n');
 
-    DeleteList (top);
+    DeleteTree (top);
     free (inorder);
     free (preorder);
     return 0;
