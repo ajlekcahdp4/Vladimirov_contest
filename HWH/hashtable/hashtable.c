@@ -4,20 +4,21 @@
 
 struct node {
     char* word;
-    struct node* next;
+    struct node *next;
 };
 
 struct Hashtable {
-    struct node** lists_ar;
+    struct node **lists_ar;
+    struct node  *list_head;
+    struct node  *list_tail;
     size_t size;
     size_t inserts;
     unsigned long long (*hash_func)(const char*);
 };
 
 
-
-
-
+//==================================================================================
+//==================================================================================
 unsigned long long Hash (const char* str)
 {
     unsigned long long hash = 0;
@@ -27,16 +28,51 @@ unsigned long long Hash (const char* str)
     return hash;
 }
 
+//==================================================================================
+
 struct Hashtable* HashTableInit (size_t size, unsigned long long (*Hash)(const char*))
 {
     struct Hashtable* HashT = calloc (1, sizeof(struct Hashtable));
+    HashT->list_head        = calloc (1, sizeof (struct node));
+    HashT->lists_ar         = calloc (size, sizeof(struct node*));
     assert (HashT);
-    HashT->size = size;
-    HashT->lists_ar = calloc (HashT->size, sizeof(struct node*));
-    assert(HashT);
+    assert (HashT->lists_ar);
+    assert (HashT->list_head);
+    HashT->size      = size;
     HashT->hash_func = Hash;
+    HashT->list_tail = HashT->list_head;
+
     return HashT;
 }
+//==================================================================================
+struct node *ListInsert (struct node *last, int str_len, char* word)
+{
+    struct node *cur = last;
+    if (cur->next == 0)
+    {
+        cur->next       = calloc (1, sizeof (struct node));
+        cur->next->word = calloc (str_len + 1, sizeof (char));
+
+        assert (cur->next);
+        assert (cur->next->word);
+    }
+    else
+    {
+        struct node *new_node = calloc (1, sizeof (struct node));
+        new_node->word        = calloc (str_len + 1, sizeof (char));
+
+        assert (new_node);
+        assert (new_node->word);
+
+        new_node->next = cur->next;
+        memcpy (new_node->word, word, str_len * sizeof (char));
+        cur->next = new_node;
+    }
+    return cur->next;
+}
+//==================================================================================
+
+
 
 struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
 {
@@ -45,12 +81,10 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
     if (HashT->lists_ar[hash] == 0)
     {
         HashT->lists_ar[hash] = calloc (1, sizeof(struct node));
-        HashT->lists_ar[hash]->next = calloc (1, sizeof (struct node));
-        HashT->lists_ar[hash]->next->word = calloc (str_len + 1, sizeof(char));
         assert (HashT->lists_ar[hash]);
-        assert (HashT->lists_ar[hash]->next);
-        assert(HashT->lists_ar[hash]->next->word);
-        memcpy(HashT->lists_ar[hash]->next->word, word, str_len);
+        
+        HashT->list_tail->next = ListInsert (HashT->lists_ar[hash], str_len, word);
+        HashT->list_tail       = HashT->list_tail->next;
     }
     else
     {
@@ -58,37 +92,26 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
             HashT = HashTableResize (HashT);
         
         struct node* cur = HashT->lists_ar[hash]->next;
-        while (cur->next != 0)
-            cur = cur->next;
-        cur->next = calloc (1, sizeof (struct node));
-        assert(cur->next);
-        cur = cur->next;
-        cur->word = calloc (str_len + 1, sizeof(char));
-        assert(cur->word);
-        assert (cur->word);
-        
-        memcpy(cur->word, word, str_len);
+
+        while (HashT->hash_func(cur->next->word) == hash)
+            cur = cur->next;//Дошли до последнего элемента с нашим хэшем
+
+        ListInsert (cur, str_len, word);
     }
     return HashT;
 }
 
+//==================================================================================
 
-void DeleteNodeAft (struct node* last)
-{
-    assert (last->next);
-    struct node* cur = last->next;
-    last->next = cur->next;
-    free(cur->word);
-    free (cur); 
-}
 
-struct Hashtable* HashTableResize (struct Hashtable* OldHashT) //Rehashing
+
+struct Hashtable* HashTableResize (struct Hashtable* OldHashT) //Still does not rewrite to one-list hashtable
 {
     struct Hashtable* NewHashT = 0;
     struct node* cur = 0;
     struct node* next = 0;
     NewHashT = HashTableInit (2 * OldHashT->size, Hash);
-//========================================================================
+    //+++++++++++++++++++++++++++++++++++++++++
     for (unsigned int i = 0; i < OldHashT->size; i++)
     {
         if (OldHashT->lists_ar[i])
@@ -106,12 +129,14 @@ struct Hashtable* HashTableResize (struct Hashtable* OldHashT) //Rehashing
                     HashtableInsert (NewHashT, cur->word);
         }
     }
-//========================================================================
+    //+++++++++++++++++++++++++++++++++++++++++
     DeleteHastable (OldHashT);
     return NewHashT;
 }
 
-int NumOfWord (struct Hashtable* HashT, char* word)
+//==================================================================================
+
+int NumOfWord (struct Hashtable* HashT, char* word) //Still does not rewrite to one-list hashtable
 {
     int N = 0;
 
@@ -137,6 +162,20 @@ int NumOfWord (struct Hashtable* HashT, char* word)
 }
 
 
+//==================================================================================
+
+void ListDeleteNodeAft (struct node* last)
+{
+    assert (last->next);
+
+    struct node* cur = last->next;
+    last->next       = cur->next;
+
+    free (cur->word);
+    free (cur); 
+}
+
+//==================================================================================
 
 void DeleteList (struct node* top)
 {
@@ -153,16 +192,11 @@ void DeleteList (struct node* top)
     free(cur_node);
 }
 
+//==================================================================================
+
 void DeleteHastable (struct Hashtable* HashT)
 {
-    for (unsigned int i = 0; i < HashT->size; i++)
-    {
-        if (HashT->lists_ar[i] != 0)
-        {
-            DeleteList (HashT->lists_ar[i]->next);
-            free(HashT->lists_ar[i]);
-        }
-    }
-    free(HashT->lists_ar);
+    DeleteList (HashT->list_head);
+    free (HashT->lists_ar);
     free (HashT);
 }
