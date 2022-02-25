@@ -5,21 +5,6 @@
 #include "hashtable/hashtable.h"
 
 
-struct node {
-    char* word;
-    struct node *next;
-};
-
-struct Hashtable {
-    struct node **lists_ar;
-    struct node  *list_head;
-    struct node  *list_tail;
-    unsigned long long size;
-    unsigned long long inserts;
-    unsigned long long (*hash_func)(const char*);
-};
-
-struct node *ListInsert (struct node *last, int str_len, char* word);
 //======================================================================
 
 
@@ -43,7 +28,7 @@ int ReadWordF (char* temp_str, FILE* input)
 
 
 
-void TextInput (struct Hashtable* HashT, long long text_len, FILE* input) //не все слова
+void TextInput (struct Hashtable* HashT, long long text_len, FILE* input)
 {
     char* temp_str = calloc (100, sizeof(char));
     assert(temp_str);
@@ -103,23 +88,10 @@ int main ()
     assert(fscanf(input, "%lld", &text_len));
     
     
-    HashT = HashTableInit (100, Hash);
+    HashT = HashTableInit (16, Hash);
     TextInput (HashT, text_len, input); 
     words = WordsInput (N, input);
-    //printffff
-    /*
-    struct node *cur = HashT->list_head->next;
-    while (cur->next)
-    {
-        printf ("\n%p, %s, %p\n", cur, cur->word, cur->next);
-        cur = cur->next;
-    }
-    printf ("\n%p, %s, %p\n", cur, cur->word, cur->next);
-    //printffff
-    */
-
-    HashTDump (HashT, "end.png");
-    //======================================================
+    
     for (int i = 0; i < N; i++)
         printf ("%d ", NumOfWord(HashT, words[i]));
     putchar('\n');

@@ -10,4 +10,4 @@ HT:
 dump_:
 	$(CC) $(CFLAGS) -g -c dump/dump.c
 clean:
-	rm -rf *.o *.out
+	rm -rf *.o *.out *.png

@@ -59,7 +59,7 @@ struct node *ListInsert (struct node *last, int str_len, char* word)
         assert (cur->next);
         assert (cur->next->word);
 
-        memcpy (cur->next->word, word, str_len);
+        memcpy (cur->next->word, word, str_len * sizeof(char));
     }
     else
     {
@@ -69,8 +69,8 @@ struct node *ListInsert (struct node *last, int str_len, char* word)
         assert (new_node);
         assert (new_node->word);
 
-        new_node->next = cur->next;
         memcpy (new_node->word, word, str_len * sizeof (char));
+        new_node->next = cur->next;
         cur->next = new_node;
     }
     
@@ -82,33 +82,34 @@ struct node *ListInsert (struct node *last, int str_len, char* word)
 
 struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
 {
+    assert (HashT);
+    assert (word);
+    if ((float)HashT->inserts / (float)HashT->size >= 0.7)
+    {
+        HashT = HashTableResize (HashT);
+    }
+
+
     int str_len = strlen (word);
     unsigned long long hash = HashT->hash_func (word) % HashT->size;
 
     if (HashT->lists_ar[hash] == 0)
     {
-        //printf("+ ");
         HashT->lists_ar[hash] = calloc (1, sizeof(struct node));
         assert (HashT->lists_ar[hash]);
         
         HashT->lists_ar[hash]->next = ListInsert (HashT->list_tail, str_len, word);
-        HashT->list_tail       = HashT->list_tail->next;
+        HashT->list_tail            = HashT->list_tail->next;
     }
     else
     {
-        //printf("* ");
-        if ((float)HashT->inserts / (float)HashT->size >= 0.7)
-        {
-            HashT = HashTableResize (HashT);
-            hash  = HashT->hash_func (word) % HashT->size;
-        }
         struct node* cur = HashT->lists_ar[hash];
 
-        while (cur != HashT->list_tail && HashT->hash_func(cur->next->word) % HashT->size == hash) //segfault
-            cur = cur->next;//Дошли до последнего элемента с нашим хэшем
+        while (cur != HashT->list_tail && HashT->hash_func(cur->next->word) % HashT->size == hash)
+            cur = cur->next;
         if (cur == HashT->list_tail)
         {
-            ListInsert (cur, str_len, word);
+            ListInsert (HashT->list_tail, str_len, word);
             HashT->list_tail = HashT->list_tail->next;
         }
         else
@@ -118,7 +119,6 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
     }
 
     HashT->inserts += 1;
-    //printf ("list_tail = %p\n", HashT->list_tail);
     return HashT;
 }
 
@@ -126,50 +126,50 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
 
 
 
-struct Hashtable* HashTableResize (struct Hashtable* HashT) //This fucking shitty bug, not work after
+struct Hashtable* HashTableResize (struct Hashtable* HashT)
 {
-    HashTDump (HashT, "BefResize.png");
-    struct node* cur = HashT->list_head;
-    assert (cur);
+    for (unsigned long long int i = 0; i < HashT->size; i++)
+        if(HashT->lists_ar[i] != 0)
+            free (HashT->lists_ar[i]);
     free (HashT->lists_ar);
+    
+    
     HashT-> size *= 2;
     HashT->lists_ar = calloc (HashT->size, sizeof (struct node*));
+
     char* temp_str = 0;
     int str_len = 0;
     struct node *last = HashT->list_tail;
-
     unsigned long long old_inserts = HashT->inserts;
+    struct node* cur = HashT->list_head;
     //+++++++++++++++++++++++++++++++++++++++++
-    while (cur != last)
-    {   printf ("<%s>\n", cur->next->word);
+    while (cur->next != last)
+    {
+        HashT->inserts = 0;
         str_len = strlen (cur->next->word);
         temp_str = calloc (str_len + 1, sizeof (char));
         memcpy (temp_str, cur->next->word, str_len);
         DeleteNodeAft (HashT, cur);
         HashtableInsert (HashT, temp_str);
-        cur = cur->next;
         free (temp_str);
     }
-    HashT->inserts = old_inserts;
-    /*
-        str_len = strlen (cur->next->word);
-        temp_str = calloc (str_len + 1, sizeof (char));
-        memcpy (temp_str, cur->next->word, str_len);
-        DeleteNodeAft (HashT, cur);
-        HashtableInsert (HashT, temp_str);*/
-        HashTDump (HashT, "aftRes.png");
+    HashT->inserts = 0;
+    str_len = strlen (cur->next->word);
+    temp_str = calloc (str_len + 1, sizeof (char));
+    memcpy (temp_str, cur->next->word, str_len);
+    DeleteNodeAft (HashT, cur);
+    HashtableInsert (HashT, temp_str);
+    free (temp_str);
     //+++++++++++++++++++++++++++++++++++++++++
+    HashT->inserts = old_inserts;
+    
     return HashT;
 }
 
 //==================================================================================
 
-int NumOfWord (struct Hashtable* HashT, char* word) //Still does not rewrite to one-list hashtable
+int NumOfWord (struct Hashtable* HashT, char* word)
 {
-    
-    //printf ("%p->", HashT->lists_ar[hash]->next->word);
-    //printf ("%p->", HashT->lists_ar[hash]->next->next->word);
-    //printf ("%p\n", HashT->lists_ar[hash]->next->next->next->word);
 
     int N  = 0;
     unsigned long long word_hash = HashT->hash_func (word) % HashT->size;
@@ -178,13 +178,17 @@ int NumOfWord (struct Hashtable* HashT, char* word) //Still does not rewrite to 
     if (cur_node == 0)
         return 0;
 
-
-    while (cur_node->next != 0 && HashT->hash_func (cur_node->next->word) % HashT->size == word_hash)
+    cur_node = cur_node->next;
+    while (cur_node != HashT->list_tail && HashT->hash_func (cur_node->word) % HashT->size == word_hash)
     {
-        if (strcmp(word, cur_node->next->word) == 0)
+
+        if (strcmp(word, cur_node->word) == 0)
             N += 1;
         cur_node = cur_node->next;
     }
+
+    if (strcmp(word, cur_node->word) == 0)
+            N += 1;
 
     return N;
 }
@@ -211,6 +215,7 @@ void HashTDump (struct Hashtable *HashT, char *name)
     memcpy (command, "dot dump.dot -T png -o ", 23 * sizeof(char));
     strcat (command, name);
     system (command);
+    system ("rm dump.dot");
     free (command);
 }
 //==================================================================================
@@ -219,11 +224,12 @@ void DeleteNodeAft (struct Hashtable *HashT, struct node* last)
 {
     assert (last->next);
 
+    if (HashT->list_tail == last->next)
+        HashT->list_tail = last;
+
     struct node* cur = last->next;
     last->next       = cur->next;
 
-    if (HashT->list_tail == last->next)
-        HashT->list_tail = last;
     free (cur->word);
     free (cur); 
 }
