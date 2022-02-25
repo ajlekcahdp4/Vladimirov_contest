@@ -256,6 +256,9 @@ void DeleteList (struct node* top)
 void DeleteHastable (struct Hashtable* HashT)
 {
     DeleteList (HashT->list_head);
+    for (unsigned long long int i = 0; i < HashT->size; i++)
+        if(HashT->lists_ar[i] != 0)
+            free (HashT->lists_ar[i]);
     free (HashT->lists_ar);
     free (HashT);
 }
