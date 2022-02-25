@@ -8,3 +8,4 @@ cd Vladimirov_contest/HWH
 ```
 make
 ```
+## Input information must be written in file "input.txt"
