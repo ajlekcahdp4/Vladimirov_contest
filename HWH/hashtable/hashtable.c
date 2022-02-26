@@ -19,8 +19,6 @@ struct Hashtable {
 
 
 //==================================================================================
-void DeleteNodeAft (struct Hashtable *HashT, struct node* last);
-//==================================================================================
 unsigned long long Hash (const char* str)
 {
     unsigned long long hash = 0;
@@ -76,6 +74,39 @@ struct node *ListInsert (struct node *last, int str_len, char* word)
     
     return cur->next;
 }
+//==================================================================================
+
+void DeleteNodeAft (struct Hashtable *HashT, struct node* last)
+{
+    assert (last->next);
+
+    if (HashT->list_tail == last->next)
+        HashT->list_tail = last;
+
+    struct node* cur = last->next;
+    last->next       = cur->next;
+
+    free (cur->word);
+    free (cur); 
+}
+
+//==================================================================================
+
+void DeleteList (struct node* top)
+{
+    struct node* cur_node = top;
+    struct node* next_node = top;
+    while (cur_node->next != 0)
+    {
+        next_node = cur_node->next;
+        free(cur_node->word);
+        free(cur_node);
+        cur_node = next_node;
+    }
+    free(cur_node->word);
+    free(cur_node);
+}
+
 //==================================================================================
 
 
@@ -220,38 +251,7 @@ void HashTDump (struct Hashtable *HashT, char *name)
 }
 //==================================================================================
 
-void DeleteNodeAft (struct Hashtable *HashT, struct node* last)
-{
-    assert (last->next);
 
-    if (HashT->list_tail == last->next)
-        HashT->list_tail = last;
-
-    struct node* cur = last->next;
-    last->next       = cur->next;
-
-    free (cur->word);
-    free (cur); 
-}
-
-//==================================================================================
-
-void DeleteList (struct node* top)
-{
-    struct node* cur_node = top;
-    struct node* next_node = top;
-    while (cur_node->next != 0)
-    {
-        next_node = cur_node->next;
-        free(cur_node->word);
-        free(cur_node);
-        cur_node = next_node;
-    }
-    free(cur_node->word);
-    free(cur_node);
-}
-
-//==================================================================================
 
 void DeleteHastable (struct Hashtable* HashT)
 {
