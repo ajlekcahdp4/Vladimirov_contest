@@ -2,6 +2,7 @@
 #include "../hashtable/hashtable.h"
 
 
+
 struct node {
     char* word;
     struct node *next;
