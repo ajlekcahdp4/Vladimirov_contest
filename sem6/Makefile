@@ -9,5 +9,7 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 -fchkp-first-field-has-own-bounds -fchkp-narrow-to-innermost-array 
 EX:
 	$(CC) $(CFLAGS) EX.c -o EX.out
+D_no_pivot:
+	$(CC) $(CFLAGS) -g D_no_pivot.c -o D_no_pivot.out -lm
 clean:
 	rm -rf *.o *.out
