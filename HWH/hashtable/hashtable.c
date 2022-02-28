@@ -18,19 +18,25 @@ struct Hashtable {
 };
 
 
+struct node *ListInsert (struct node *last, size_t str_len, char* word);
+void DeleteNodeAft (struct Hashtable *HashT, struct node* last);
+void DeleteList (struct node* top);
+
+
+
 //==================================================================================
 unsigned long long Hash (const char* str)
 {
     unsigned long long hash = 0;
-    int c = 0;
-    while ((c = *str++) != 0)
+    unsigned long long c = 0;
+    while ((c = (unsigned long long)(*str++)) != 0)
         hash = (hash << 5) + (hash << 16) - hash  + c;
     return hash;
 }
 
 //==================================================================================
 
-struct Hashtable* HashTableInit (size_t size, unsigned long long (*Hash)(const char*))
+struct Hashtable* HashTableInit (size_t size, unsigned long long (*hash_f)(const char*))
 {
     assert (size);
     struct Hashtable* HashT = calloc (1, sizeof(struct Hashtable));
@@ -40,13 +46,13 @@ struct Hashtable* HashTableInit (size_t size, unsigned long long (*Hash)(const c
     assert (HashT->lists_ar);
     assert (HashT->list_head);
     HashT->size      = size;
-    HashT->hash_func = Hash;
+    HashT->hash_func = hash_f;
     HashT->list_tail = HashT->list_head;
 
     return HashT;
 }
 //==================================================================================
-struct node *ListInsert (struct node *last, int str_len, char* word)
+struct node *ListInsert (struct node *last, size_t str_len, char* word)
 {
     struct node *cur = last;
     if (cur->next == 0)
@@ -121,7 +127,7 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
     }
 
 
-    int str_len = strlen (word);
+    size_t str_len = strlen (word);
     unsigned long long hash = HashT->hash_func (word) % HashT->size;
 
     if (HashT->lists_ar[hash] == 0)
@@ -169,7 +175,7 @@ struct Hashtable* HashTableResize (struct Hashtable* HashT)
     HashT->lists_ar = calloc (HashT->size, sizeof (struct node*));
 
     char* temp_str = 0;
-    int str_len = 0;
+    size_t str_len = 0;
     struct node *last = HashT->list_tail;
     unsigned long long old_inserts = HashT->inserts;
     struct node* cur = HashT->list_head;

@@ -28,9 +28,9 @@ void DtSetTitle(FILE* dotfile, struct Hashtable* HashT)
 {
     fprintf(dotfile ,"TITLE [shape=record, color=\"red\", label = \"DUMP of the hashTable\"];\n\n");
     fprintf (dotfile, "HEAD [shape=record, style=rounded, label =\"HEAD | %p |NEXT\\n %p\"];\n", HashT->list_head, HashT->list_head->next);
-    fprintf (dotfile, "size [shape=record, style=rounded, label =\"size | %lld\"];\n", HashT->size);
+    fprintf (dotfile, "size [shape=record, style=rounded, label =\"size | %llu\"];\n", HashT->size);
     fprintf (dotfile, "TAIL [shape=record, style=rounded, label =\"TAIL | %p\"];\n", HashT->list_tail);
-    fprintf (dotfile, "inserts [shape=record, style=rounded, label = \"inserts | %lld\"];\n", HashT->inserts);
+    fprintf (dotfile, "inserts [shape=record, style=rounded, label = \"inserts | %llu\"];\n", HashT->inserts);
 }
 
 void DtSetNode (FILE* dotfile, struct node *node)
