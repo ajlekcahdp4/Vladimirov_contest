@@ -1,45 +1,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 void ShowBin (float x)
 {
-    int *x_float = calloc (1, sizeof (int));
+    int *x_int = 0;
+    float *x_float = calloc (1, sizeof (float));
     int *mask  = calloc (1, sizeof (int));
     assert (x_float);
     assert (mask);
 
     *x_float = x;
-    int *x_int = (int*)x_float;
+    x_int = (int*)x_float;
 
-
-    for (int i = 0; i < 32; i++)
+    for (int i = 31; i >= 0; i--)
     {
         *mask = 1 << i;
-        printf ("%d ", *x_int & *mask);
+        if (*x_int & *mask)
+            printf ("1 ");
+        else
+            printf ("0 ");
+        if (i == 31 || i == 23)
+            printf ("| ");
     }
 
     putchar('\n');
-    
+
     free (mask);
     free (x_float);
-
 }
 
 
 float ReversOddB (float x)
 {
+    float res = 0;
+    int* x_inv_int = 0;
     float *x_inv = calloc (1, sizeof (float));
     int *mask  = calloc (1, sizeof (int));
     assert (x_inv);
     assert (mask);
     
     *x_inv = x;
-    int* x_inv_int = (int*)x_inv;
+    x_inv_int = (int*)x_inv;
 
     for (int i = 0; i < 23; i++)
-    {//                           0F000000 -> 
-        if (i % 2 == 0)
+    {
+        if (i % 2)
         {
             *mask = 1 << i;
             if (*x_inv_int & *mask)
@@ -49,17 +56,19 @@ float ReversOddB (float x)
         }
     }
     x_inv = (float*)x_inv_int;
+    res = *x_inv;
 
     free (mask);
     free (x_inv);
 
-    return *x_inv;
+    return res;
 }
 
 int main ()
 {
+    float numb = NAN;
+    scanf ("%f", &numb);
+    printf ("%.5f\n", ReversOddB (numb));
 
-    printf ("%.5f\n", ReversOddB (1.0));
-    ShowBin (1.0);
     return 0;
 }
