@@ -7,9 +7,12 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 -Wsuggest-final-types -Wswitch-default -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code -Wunused -Wvariadic-macros 		\
 -Wno-missing-field-initializers -Wnarrowing -Wvarargs -fcheck-new -fstack-check -fstrict-overflow -flto-odr-type-merging 	\
 -fchkp-first-field-has-own-bounds -fchkp-narrow-to-innermost-array 
+all:
 EX:
 	$(CC) $(CFLAGS) EX.c -o EX.out
 D_no_pivot:
 	$(CC) $(CFLAGS) -g D_no_pivot.c -o D_no_pivot.out -lm
+DT:
+	$(CC) $(CFLAGS) -g DT.c -o DT.out
 clean:
 	rm -rf *.o *.out
