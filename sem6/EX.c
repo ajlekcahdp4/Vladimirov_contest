@@ -3,6 +3,10 @@
 #include <assert.h>
 #include <math.h>
 
+void ShowBin (float x);
+float ReversOddB (float x);
+
+
 void ShowBin (float x)
 {
     int *x_int = 0;
