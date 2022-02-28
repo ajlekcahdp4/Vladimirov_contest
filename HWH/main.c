@@ -5,25 +5,26 @@
 #include "hashtable/hashtable.h"
 
 
-size_t ReadWordF (char* temp_str, FILE* input);
-void TextInput (struct Hashtable* HashT, size_t text_len, FILE* input);
-char** WordsInput (size_t N, FILE* input);
+size_t ReadWordF (char* temp_str);
+void TextInput (struct Hashtable* HashT, size_t text_len);
+char** WordsInput (size_t N);
 void End (struct Hashtable* HashT, char** words, size_t N);
+size_t ReadWord (char* temp_str);
 //======================================================================
 
 
-size_t ReadWordF (char* temp_str, FILE* input)
+size_t ReadWord (char* temp_str)
 {
-    int c = fgetc (input);
+    int c = getchar ();
     int i = 0;
     while (c == ' ' || c == '\n' || c == '\r')
-        c = fgetc (input);
+        c = getchar ();
 
     while (c != ' ' && c != '\n' && c != '\r' && c != EOF)
     {
         temp_str[i] = (char)c;
         i++;
-        c = fgetc(input);
+        c = getchar();
     }
     temp_str[i] = '\0';
     return strlen (temp_str);
@@ -32,7 +33,7 @@ size_t ReadWordF (char* temp_str, FILE* input)
 
 
 
-void TextInput (struct Hashtable* HashT, size_t text_len, FILE* input)
+void TextInput (struct Hashtable* HashT, size_t text_len)
 {
     char* temp_str = calloc (100, sizeof(char));
     assert(temp_str);
@@ -40,7 +41,7 @@ void TextInput (struct Hashtable* HashT, size_t text_len, FILE* input)
     size_t str_len = 0;
     for (size_t len_trav = 0; len_trav < text_len; len_trav++)
     {
-        ReadWordF (temp_str, input);
+        ReadWord (temp_str);
         str_len = strlen (temp_str);
         HashtableInsert (HashT, temp_str);
         len_trav += str_len;
@@ -51,16 +52,18 @@ void TextInput (struct Hashtable* HashT, size_t text_len, FILE* input)
 
 
 
-char** WordsInput (size_t N, FILE* input)
+char** WordsInput (size_t N)
 {
+    int res = 0;
     size_t words_len = 0;
     char** words = calloc (N, sizeof(char*));
 
-    assert(fscanf(input, "%lu", &words_len));
+    res = scanf("%lu", &words_len);
+    assert (res);
     for (size_t i = 0; i < N; i++)
     {
         words[i] = calloc (words_len, sizeof(char));
-        ReadWordF (words[i], input);
+        ReadWord (words[i]);
     }
     return words;
 }
@@ -82,24 +85,25 @@ void End (struct Hashtable* HashT, char** words, size_t N)
 
 int main ()
 {
+    int res                 = 0;
     size_t N                = 0;
     size_t text_len         = 0;
     struct Hashtable* HashT = 0;
     char** words            = 0;
-    FILE* input = fopen ("input.txt", "r");
 
-    assert(fscanf(input, "%lu", &N));
-    assert(fscanf(input, "%lu", &text_len));
+    res = scanf("%lu", &N);
+    assert (res);
+    res = scanf("%lu", &text_len);
+    assert (res);
     
     
     HashT = HashTableInit (16, Hash);
-    TextInput (HashT, text_len, input); 
-    words = WordsInput (N, input);
+    TextInput (HashT, text_len); 
+    words = WordsInput (N);
     
     for (size_t i = 0; i < N; i++)
         printf ("%d ", NumOfWord(HashT, words[i]));
     putchar('\n');
     End (HashT, words, N);
-    fclose (input);
     return 0;
 }
