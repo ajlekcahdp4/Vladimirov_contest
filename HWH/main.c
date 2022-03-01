@@ -97,7 +97,7 @@ int main ()
     assert (res);
     
     
-    HashT = HashTableInit (16, Hash);
+    HashT = HashTableInit (128, Hash);
     TextInput (HashT, text_len); 
     words = WordsInput (N);
     
