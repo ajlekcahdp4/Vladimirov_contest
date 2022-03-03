@@ -15,4 +15,4 @@ D_no_pivot:
 DT:
 	$(CC) $(CFLAGS) -g DT.c -lm -o DT.out
 clean:
-	rm -rf *.o *.out
+	rm -rf *.o *.out *.txt
