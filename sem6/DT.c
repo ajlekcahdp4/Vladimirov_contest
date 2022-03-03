@@ -1,3 +1,4 @@
+//Выбираем в качестве пивота наибольший элемент в подматрице
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -25,6 +26,7 @@ int main ()
 
     Matrix = MatrixInit (N);
     printf ("%d\n", Gauss_Jordan (Matrix, N));
+    //PrintMatrix (Matrix, N);
     
     DeleteMatrix (Matrix, N);
     return 0;
@@ -39,8 +41,9 @@ int Gauss_Jordan (float** Matrix, size_t N)
     float *temp_row = 0;
     for (col = 0; col < N; col++)
     {
-        row = 0;
-        while (row < N && FloatCompr(Matrix[row][col], NULL_FLOAT, EPSILON) == 0) //compr
+        //PrintMatrix (Matrix, N);
+        row = col;
+        while (row < N && FloatCompr(Matrix[row][col], NULL_FLOAT, EPSILON) == 0)
             row += 1;
 
         temp_row = Matrix[col];
@@ -56,12 +59,22 @@ int Gauss_Jordan (float** Matrix, size_t N)
 
     return det;
 }
+/*
+1 1 1 0
+-1 2 1 0
+1 4 1 0
+0 0 0 3
 
+
+1 1 1 0
+
+
+*/
 void Elimination (float** Matrix, size_t N, size_t row, size_t col)
 {
     float k  = 0;
     k = Matrix[row][col] / Matrix[col][col];
-    for (size_t cur_col = 0; cur_col < N; cur_col++)
+    for (size_t cur_col = col; cur_col < N; cur_col++)
     {
         Matrix[row][cur_col] -= k * Matrix[col][cur_col];
     }
