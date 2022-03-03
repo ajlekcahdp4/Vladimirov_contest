@@ -45,13 +45,19 @@ int Gauss_Jordan (float** Matrix, size_t N)
         while (row < N && FloatCompr(Matrix[row][col], NULL_FLOAT, EPSILON) == 0)
             row += 1;
 
-        temp_row = Matrix[col];
-        Matrix[col] = Matrix[row];
-        Matrix[row] = temp_row;
+        if (row == N)
+            row -= 1;
 
-        for (row = 0; row < N; row++)
-            if (row != col)
-                Elimination (Matrix, N, row, col);
+        if (FloatCompr (Matrix[row][col], NULL_FLOAT, EPSILON) != 0)
+        {
+            temp_row = Matrix[col];
+            Matrix[col] = Matrix[row];
+            Matrix[row] = temp_row;
+
+            for (row = 0; row < N; row++)
+                if (row != col)
+                    Elimination (Matrix, N, row, col);
+        }
     }
 
     det = DiagonalDet (Matrix, N);
@@ -71,7 +77,7 @@ int Gauss_Jordan (float** Matrix, size_t N)
 */
 void Elimination (float** Matrix, size_t N, size_t row, size_t col)
 {
-    float k  = 0;
+    float k  = NULL_FLOAT;
     k = Matrix[row][col] / Matrix[col][col];
     for (size_t cur_col = col; cur_col < N; cur_col++)
     {
