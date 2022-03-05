@@ -2,7 +2,7 @@
 ## to copy this problem run:
 ```
 git clone https://github.com/ajlekcahdp4/Vladimirov_contest
-cd Vladimirov_contest/HWH
+cd Vladimirov_contest/HWH/LVL3
 ```
 ## To compile this program run:
 ```
