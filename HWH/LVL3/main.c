@@ -5,13 +5,13 @@
 #include "hashtable/hashtable.h"
 
 
-size_t ReadWordF  (char* temp_str);
-void   TextInput  (char** buf, size_t N);
-char** WordsInput (size_t N);
-void   End        (struct Hashtable* HashT, char** buf, size_t N);
-size_t ReadWord   (char* temp_str);
+size_t ReadWord     (char* temp_str);
+void   TextInput    (char** buf, size_t N);
+char** WordsInput   (size_t N);
+void   End          (struct Hashtable* HashT, char** buf, size_t N);
+size_t ReadWord     (char* temp_str);
 
-struct Hashtable *FillHashtable (struct Hashtable *HashT, size_t N);
+
 //======================================================================
 
 
@@ -38,27 +38,25 @@ size_t ReadWord (char* temp_str)
 void TextInput (char** buf, size_t N)
 {
     size_t str_len = 0;
+    size_t j       = 0;
     char* temp_str = calloc (100, sizeof(char));
 
     for (size_t i = 0; i < N; i++)
     {
-        Readword (temp_str);
-        str_len = strlen (temp_str);
-        buf[i] = calloc (str_len, sizeof (char));
+        str_len = ReadWord (temp_str);
+        buf[i] = calloc (str_len + 1, sizeof (char));
         memcpy (buf[i], temp_str, (str_len + 1)*sizeof(char));
-    }
-}
 
-struct Hashtable *FillHashtable (struct Hashtable *HashT, size_t N)
-{
-    for (size_t first = 0; first < N; first++)
-    {
-        for (size_t second = 0; second < N; second++)
+        while (temp_str[j] != 0)
         {
-                
+            temp_str[j] = 0;
+            j++;
         }
     }
+    free (temp_str);
 }
+
+
 
 
 void End (struct Hashtable* HashT, char** buf, size_t N)
@@ -73,13 +71,14 @@ void End (struct Hashtable* HashT, char** buf, size_t N)
 }
 
 
+
 int main ()
 {
     int res                 = 0;
     size_t N                = 0;
     struct Hashtable* HashT = 0;
     char** buf = 0;
-    size_t start_size = 10000;
+    size_t start_size = 10;
 
     res = scanf("%lu", &N);
     assert (res);
@@ -88,6 +87,10 @@ int main ()
     TextInput (buf, N);
 
     HashT = HashTableInit (start_size, Hash);
+    FillHashtable (HashT, buf, N);
+    HashTDump (HashT, "dump.png");
+    printf ("%lu\n", NumberOfFour (HashT, buf, N));
+
 
     End (HashT, buf, N);
     return 0;

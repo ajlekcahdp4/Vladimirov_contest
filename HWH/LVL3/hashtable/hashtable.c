@@ -21,6 +21,7 @@ struct Hashtable {
 struct node *ListInsert (struct node *last, size_t str_len, char* word);
 void DeleteNodeAft (struct Hashtable *HashT, struct node* last);
 void DeleteList (struct node* top);
+struct Hashtable *FillHashtable (struct Hashtable *HashT, char **buf, size_t N);
 
 
 
@@ -205,10 +206,10 @@ struct Hashtable* HashTableResize (struct Hashtable* HashT)
 
 //==================================================================================
 
-int NumOfWord (struct Hashtable* HashT, char* word)
+size_t NumOfWord (struct Hashtable* HashT, char* word)
 {
 
-    int N  = 0;
+    size_t N  = 0;
     unsigned long long word_hash = HashT->hash_func (word) % HashT->size;
     struct node* cur_node        = HashT->lists_ar[word_hash];
 
@@ -229,6 +230,57 @@ int NumOfWord (struct Hashtable* HashT, char* word)
 
     return N;
 }
+
+size_t NumberOfFour (struct Hashtable *HashT, char **buf, size_t N)
+{
+    char *temp_str = calloc (100, sizeof(char));
+    size_t i            = 0;
+    size_t numb_of_four = 0;
+    size_t numb_of_word = 0;
+
+    for (size_t first = 0; first < N; first++)
+    {
+        for (size_t second = 0; second < N; second++)
+        {
+            if (second != first)
+            {
+                while (temp_str[i] != 0)
+                {
+                    temp_str[i] = 0;
+                    i++;
+                }
+                i = 0;
+
+                memcpy (temp_str, buf[first], strlen(buf[first]) * sizeof(char));
+                strcat (temp_str, buf[second]);
+
+                numb_of_word = NumOfWord (HashT, temp_str);
+                //printf("numb_of_word \"%s\" = %lu\n", temp_str, numb_of_word);
+                numb_of_four += numb_of_word - 1;
+
+
+                while (temp_str[i] != 0)
+                {
+                    temp_str[i] = 0;
+                    i++;
+                }
+                i = 0;
+
+                memcpy (temp_str, buf[second], strlen(buf[second]) * sizeof(char));
+                strcat (temp_str, buf[first]);
+
+                numb_of_word = NumOfWord (HashT, temp_str);
+                //printf("numb_of_word \"%s\" = %lu\n", temp_str, numb_of_word);
+                numb_of_four += numb_of_word - 1;
+
+                //printf("number of four = %lu\n\n", numb_of_four);
+            }
+        }
+    }
+    free (temp_str);
+    return numb_of_four / 4;
+}
+
 
 //==================================================================================
 void HashTDump (struct Hashtable *HashT, char *name)
@@ -256,9 +308,46 @@ void HashTDump (struct Hashtable *HashT, char *name)
     free (command);
 }
 //==================================================================================
+struct Hashtable *FillHashtable (struct Hashtable *HashT, char **buf, size_t N)
+{
+    char *temp_str = calloc (100, sizeof(char));
+    size_t i       = 0;
+
+    for (size_t first = 0; first < N; first++)
+    {
+        for (size_t second = 0; second < N; second++)
+        {
+            while (temp_str[i] != 0)
+            {
+                temp_str[i] = 0;
+                i++;
+            }
+            i = 0;
+
+            memcpy (temp_str, buf[first], strlen(buf[first]) * sizeof(char));
+            strcat (temp_str, buf[second]);
+            HashtableInsert (HashT, temp_str);
+
+            while (temp_str[i] != 0)
+            {
+                temp_str[i] = 0;
+                i++;
+            }
+            
+            memcpy (temp_str, buf[second], strlen(buf[second]) * sizeof(char));
+            strcat (temp_str, buf[first]);
+            HashtableInsert (HashT, temp_str);
+
+        }
+    }
+    free (temp_str);
+    return HashT;
+}
 
 
 
+
+//==================================================================================
 void DeleteHastable (struct Hashtable* HashT)
 {
     DeleteList (HashT->list_head);
