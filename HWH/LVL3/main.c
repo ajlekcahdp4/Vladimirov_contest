@@ -78,7 +78,7 @@ int main ()
     size_t N                = 0;
     struct Hashtable* HashT = 0;
     char** buf = 0;
-    size_t start_size = 10;
+    size_t start_size = 8;
 
     res = scanf("%lu", &N);
     assert (res);
