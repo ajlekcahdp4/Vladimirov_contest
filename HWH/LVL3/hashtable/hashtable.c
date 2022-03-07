@@ -290,13 +290,16 @@ void HashTDump (struct Hashtable *HashT, char *name)
     DtStart (dotfile);
     DtSetTitle (dotfile, HashT);
     struct node *cur = HashT->list_head->next;
+    DtSetBuf (dotfile, HashT);
     while (cur != 0)
     {
-        DtSetNode (dotfile, cur);
+        DtSetNodes (dotfile, cur, HashT);
         cur = cur->next;
     }
     fprintf (dotfile, "\n\n\n");
+
     DtSetDependence (dotfile, HashT);
+
     DtEnd (dotfile);
     fclose (dotfile);
     
@@ -304,7 +307,7 @@ void HashTDump (struct Hashtable *HashT, char *name)
     memcpy (command, "dot dump.dot -T png -o ", 23 * sizeof(char));
     strcat (command, name);
     system (command);
-    system ("rm dump.dot");
+    //system ("rm dump.dot");
     free (command);
 }
 //==================================================================================

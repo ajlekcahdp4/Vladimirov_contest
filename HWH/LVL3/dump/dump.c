@@ -27,39 +27,69 @@ void DtStart (FILE* dotfile)
 void DtSetTitle(FILE* dotfile, struct Hashtable* HashT)
 {
     fprintf(dotfile ,"TITLE [shape=record, color=\"red\", label = \"DUMP of the hashTable\"];\n\n");
-    fprintf (dotfile, "HEAD [shape=record, style=rounded, label =\"HEAD | %p |NEXT\\n %p\"];\n", HashT->list_head, HashT->list_head->next);
     fprintf (dotfile, "size [shape=record, style=rounded, label =\"size | %llu\"];\n", HashT->size);
-    fprintf (dotfile, "TAIL [shape=record, style=rounded, label =\"TAIL | %p\"];\n", HashT->list_tail);
     fprintf (dotfile, "inserts [shape=record, style=rounded, label = \"inserts | %llu\"];\n", HashT->inserts);
 }
 
-void DtSetNode (FILE* dotfile, struct node *node)
+void DtSetBuf (FILE *dotfile, struct Hashtable* HashT)
 {
-    fprintf (dotfile, "Node%p [shape=record, style=filled, fillcolor = \"palegreen\", label=\"adr\\n%p|word\\n%s|next\\n%p\"];\n", node, node, node->word, node->next);
+    fprintf (dotfile, "\n");
+    
+    fprintf (dotfile, "subgraph clusterbuffer {\n");
+    fprintf (dotfile, "node [style=filled, fillcolor=white];\n");
+    fprintf (dotfile, "style=filled;\ncolor=lightgrey");
+
+    for (size_t i = 0; i < HashT->size; i++)
+    {
+        if (HashT->lists_ar[i])
+        {
+            fprintf (dotfile, "    Buf%lu [shape=record, label=\"[%lu]\"];\n", i, i);
+        }
+    }
+    fprintf (dotfile, "label=\"buffer\";\n}\n\n");
+
+}
+
+void DtSetNodes (FILE* dotfile, struct node *node, struct Hashtable *HashT)
+{
+    fprintf (dotfile, "Node%p [shape=record, style=filled, fillcolor = \"palegreen\", label=\"adr\\n%p|word\\n%s|Hash = %llu|next\\n%p\"];\n", node, node, node->word,HashT->hash_func (node->word)%HashT->size, node->next);
 }
 
 void DtSetDependence (FILE* dotfile, struct Hashtable *HashT)
 {
-    struct node *cur = HashT->list_head->next;
-    while (cur != 0)
+    unsigned long long words_hash = 0;
+    struct node        *cur       = 0;
+
+
+    fprintf (dotfile, "\n");
+    for (size_t i = 0; i < HashT->size; i++)
     {
-        fprintf (dotfile, "Node%p -> ", cur);
-        cur = cur->next;
+        if (HashT->lists_ar[i])
+        {
+            fprintf (dotfile, "Buf%lu -> Node%p[color=\"red\", constraint=true];\n", i, HashT->lists_ar[i]->next);
+        }
     }
-    fprintf (dotfile, "Node0 [color=\"invis\"];\n\n");
 
-
-    cur = HashT->list_head->next;
-    fprintf (dotfile, "HEAD ->");
-    while (cur != 0)
+    //lists dependencies=======================================================
+    for (size_t i = 0; i < HashT->size; i++)
     {
-        fprintf (dotfile, "Node%p -> ", cur);
-        cur = cur->next;
+        if (HashT->lists_ar[i])
+        {
+            cur = HashT->lists_ar[i]->next;
+            words_hash = HashT->hash_func (cur->word) % HashT->size;
+            while (cur->next && words_hash == HashT->hash_func (cur->next->word)%HashT->size)
+            {
+                fprintf (dotfile, "Node%p->", cur);
+                cur = cur->next;
+            }
+            if (cur != HashT->lists_ar[i]->next)
+            {
+                fprintf (dotfile, "Node%p", cur);
+                fprintf(dotfile, "[color=\"red\"];\n");
+            }
+        }
     }
-    fprintf (dotfile, "0 [color=\"red\"];\n\n");
-
-    fprintf (dotfile, "TAIL->Node%p[color=\"red\"];\n", HashT->list_tail);
-    fprintf(dotfile, "size->inserts[color=\"invis\"];\n");
+    fprintf (dotfile, "\n");
 }
 
 void DtEnd (FILE* dotfile)
