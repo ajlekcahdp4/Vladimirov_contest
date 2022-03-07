@@ -307,7 +307,7 @@ void HashTDump (struct Hashtable *HashT, char *name)
     memcpy (command, "dot dump.dot -T png -o ", 23 * sizeof(char));
     strcat (command, name);
     system (command);
-    //system ("rm dump.dot");
+    system ("rm dump.dot");
     free (command);
 }
 //==================================================================================
