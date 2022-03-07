@@ -14,5 +14,7 @@ D_no_pivot:
 	$(CC) $(CFLAGS) -g D_no_pivot.c -o D_no_pivot.out -lm
 DT:
 	$(CC) $(CFLAGS) -g DT.c -lm -o DT.out
+RP:
+	$(CC) $(CFLAGS) RP.c -o rp.out -lm
 clean:
 	rm -rf *.o *.out *.txt
