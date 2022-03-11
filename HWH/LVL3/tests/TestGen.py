@@ -29,12 +29,12 @@ def GenerateTest (words, N1, text2, N2):
     test = []
     words_index_list = []
 
-    test_len = rand.randint (3, N1)
+    test_len = rand.randint (3, N2)
     answ = rand.randint (3, 100)
 
-    print ("test_len = " + str(4 * test_len))
+    print ("test_len = " + str(test_len + 4*answ))
     print ("answ = %s"%(answ))
-    test.append (str(answ * 4 + N2))
+    test.append (str(answ * 4 + test_len))
     #insert fours
     for cnt in range(answ):
         i = 1
@@ -47,7 +47,7 @@ def GenerateTest (words, N1, text2, N2):
         test.append (words[i + 3])
     #insert other words
     words_index_list = []
-    for i in range (0, N2):
+    for i in range (0, test_len):
         index = 0
         while (words_index_list.count(index) > 0):
             index = rand.randint (0, N2 - 1)
@@ -67,7 +67,7 @@ second_text = []
 N1 = FileToBuf ("tests/src/1.src", first_text)
 N2 = FileToBuf ("tests/src/2.src", second_text)
 
-test_file = open ("tests/dat/4.dat", "w")
+test_file = open ("tests/dat/5.dat", "w")
 
 #---------------------------get_text------------------------------
 words = CrushingWords (first_text, N1)
