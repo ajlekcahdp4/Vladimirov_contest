@@ -1,8 +1,8 @@
 #===========================================================================
 #=================================main()====================================
 #===========================================================================
-file = open ("tests/dat/" + input(), "r")
-
+test_file_name = input ()
+file = open ("tests/dat/" + test_file_name, "r")
 N = int(file.readline())
 
 text = []
@@ -24,4 +24,8 @@ for i in range (0, N):
         #print ("string = <%s>, count = %s\n" %(words[i], words.count (words[i])))
         cnt += count_of_word
         passed_words.append (words[i])
-print (str(cnt))
+
+#---------------------------------------------------------------------------------
+output_file = open ("tests/ans/" + test_file_name[:len(test_file_name) - 4] + ".ans", "w")
+output_file.write (str(cnt))
+output_file.close()
