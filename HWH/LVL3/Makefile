@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 -Wrestrict -Wshadow -Wstack-usage=8192 -Wstrict-overflow=2 -Wstringop-overflow=4 -Wsuggest-attribute=noreturn				\
 -Wsuggest-final-types -Wswitch-default -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code -Wunused -Wvariadic-macros 		\
 -Wno-missing-field-initializers -Wnarrowing -Wvarargs -fcheck-new -fstack-check -fstrict-overflow -flto-odr-type-merging 	\
--fchkp-first-field-has-own-bounds -fchkp-narrow-to-innermost-array 
+-fchkp-first-field-has-own-bounds -fchkp-narrow-to-innermost-array
 
 all: HWH
 HWH: main HT dump_
@@ -17,5 +17,7 @@ HT:
 	$(CC) $(CFLAGS) -g -c hashtable/hashtable.c
 dump_:
 	$(CC) $(CFLAGS) -g -c dump/dump.c
+TestGen:
+	python3 tests/TestGen.py
 clean:
 	rm -rf *.o *.out *.png
