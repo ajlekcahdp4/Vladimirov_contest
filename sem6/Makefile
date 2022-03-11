@@ -16,5 +16,7 @@ DT:
 	$(CC) $(CFLAGS) -g DT.c -lm -o DT.out
 RP:
 	$(CC) $(CFLAGS) RP.c -o rp.out -lm
+DH:
+	$(CC) $(CFLAGS) DH.c -o dh.out -lm
 clean:
 	rm -rf *.o *.out *.txt
