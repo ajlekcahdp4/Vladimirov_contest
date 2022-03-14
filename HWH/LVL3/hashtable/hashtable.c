@@ -17,7 +17,9 @@ struct Hashtable {
     unsigned long long (*hash_func)(const char*);
 };
 
-
+struct node *ListInit (void);
+size_t ListCount (struct node *top, struct node *aim_node);
+int nodecmp (struct node* node1, struct node* node2);
 struct node *ListInsert (struct node *last, size_t str_len, char* word);
 void DeleteNodeAft (struct Hashtable *HashT, struct node* last);
 void DeleteList (struct node* top);
@@ -55,6 +57,11 @@ size_t ListCount (struct node *top, struct node *aim_node)
         cur = cur->next;
     }
     return cnt;
+}
+//==================================================================================
+int nodecmp (struct node* node1, struct node* node2)
+{
+    return strcmp (node1->word, node2->word);
 }
 //==================================================================================
 
@@ -256,6 +263,7 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
 {
     unsigned long long words_hash = 0;
     size_t numb_of_four   = 0;
+    size_t cnt            = 0;
     struct node *cur      = 0;
     struct node *cmp_node = 0;
     struct node *top      = 0;
@@ -267,6 +275,7 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
     {
         if (HashT->lists_ar[i])
         {
+            printf("---------------\n[%lu]\n", i);
             cur = HashT->lists_ar[i]->next;
             cmp_node = cur;
             words_hash = i;
@@ -274,18 +283,16 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
             {
                 if (ListCount (top, cmp_node) == 0)
                 {
-                    cmp_node = cur;
                     last = ListInsert (last, strlen (cmp_node->word), cmp_node->word);
-                }
-                
-                while (cur->next && words_hash == HashT->hash_func (cur->word) % HashT->size)
-                {
-                    if (strcmp (cmp_node->word, cur->next->word) == 0)
-                        numb_of_four += 1;
-                    cur = cur->next;
-                }
+                    cnt = ListCount (HashT->lists_ar[i], cmp_node);
+                    if (cnt > 1)
+                    {
+                        numb_of_four += cnt;
+                        printf("[%lu]+\n", i);
+                    }
+                    printf ("%lu\n", cnt);
+                }           
                 cmp_node = cmp_node->next;
-                cur = HashT->lists_ar[i]->next;
             }
         }
     }
