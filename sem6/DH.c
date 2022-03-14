@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <math.h>
 
-#define EPSILON 1e-5f
+#define EPSILON 1e-6
 
 struct equation {
     double a;
@@ -38,8 +38,7 @@ double FindRoot (double left_b, double right_b, struct equation *eq)
     double new_b = (left_b + right_b) / 2;
 
     
-
-    while (fabs (left_b - right_b) - EPSILON > 0)
+    while (fabs (right_b - left_b) - EPSILON > 0)
     {
         new_b = (left_b + right_b) / 2;
 
@@ -53,6 +52,8 @@ double FindRoot (double left_b, double right_b, struct equation *eq)
         else
             left_b = new_b;
     }
+    if (fabs(Function (eq, new_b)) - 1e-2 > 0.0)
+        return 0.0;
 
     return new_b;
 }
@@ -67,7 +68,7 @@ int main ()
     res = scanf ("%lf %lf %lf %lf", &eq->a, &eq->b ,&eq->c ,&N);
     assert (res == 4);
 
-    printf ("%.5g\n", FindRoot (-N, N, eq));
+    printf ("%.5lf\n", FindRoot (-N, N, eq));
 
 
 
