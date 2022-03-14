@@ -240,19 +240,29 @@ size_t NumOfWord (struct Hashtable* HashT, char* word)//cringe
 size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблице и проверяем коллизии
 {
     unsigned long long words_hash = 0;
-    size_t numb_of_four = 0;
-    struct node *cur = 0;
+    size_t numb_of_four   = 0;
+    struct node *cur      = 0;
     struct node *cmp_node = 0;
+    struct node *top      = 0;
+    struct node *last     = 0;
 
+    top = ListInit ();
+    last = top;
     for (size_t i = 0; i < HashT->size; i++)
     {
         if (HashT->lists_ar[i])
         {
             cur = HashT->lists_ar[i]->next;
             cmp_node = cur;
-            words_hash = HashT->hash_func (cur->word) % HashT->size;
+            words_hash = i;
             while (cmp_node && words_hash == HashT->hash_func (cmp_node->word) % HashT->size)
             {
+                if (ListCount (top, cmp_node) == 0)
+                {
+                    cmp_node = cur;
+                    last = ListInsert (last, strlen (cmp_node->word), cmp_node->word);
+                }
+                
                 while (cur->next && words_hash == HashT->hash_func (cur->word) % HashT->size)
                 {
                     if (strcmp (cmp_node->word, cur->next->word) == 0)
@@ -264,6 +274,8 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
             }
         }
     }
+
+    DeleteList (top);
 
 
     return numb_of_four;
