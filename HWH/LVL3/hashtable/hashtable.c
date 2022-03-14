@@ -275,7 +275,7 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
     {
         if (HashT->lists_ar[i])
         {
-            printf("---------------\n[%lu]\n", i);
+            //printf("---------------\n[%lu]\n", i);
             cur = HashT->lists_ar[i]->next;
             cmp_node = cur;
             words_hash = i;
@@ -287,10 +287,10 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
                     cnt = ListCount (HashT->lists_ar[i], cmp_node);
                     if (cnt > 1)
                     {
-                        numb_of_four += cnt;
-                        printf("[%lu]+\n", i);
+                        numb_of_four += (cnt * (cnt - 1)) / 2;
+                        //printf("[%lu]+\n", i);
                     }
-                    printf ("%lu\n", cnt);
+                    //printf ("%lu\n", cnt);
                 }           
                 cmp_node = cmp_node->next;
             }
