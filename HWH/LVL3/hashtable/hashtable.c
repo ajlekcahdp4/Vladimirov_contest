@@ -41,7 +41,21 @@ struct node *ListInit (void)
     return top;
 }
 //==================================================================================
+size_t ListCount (struct node *top, struct node *aim_node)
+{
+    assert (top);
+    assert (aim_node);
 
+    size_t cnt = 0;
+    struct node *cur = top;
+    while (cur)
+    {
+        if (cur != top && nodecmp (cur, aim_node) == 0)
+            cnt += 1;
+        cur = cur->next;
+    }
+    return cnt;
+}
 //==================================================================================
 
 struct Hashtable* HashTableInit (size_t size, unsigned long long (*hash_f)(const char*))
