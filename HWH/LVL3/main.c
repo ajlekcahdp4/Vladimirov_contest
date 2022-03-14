@@ -89,7 +89,7 @@ int main ()
     HashT = HashTableInit (start_size, Hash);
     printf ("fill\n");
     FillHashtable (HashT, buf, N);
-    //HashTDump (HashT, "dump.png");
+    HashTDump (HashT, "dump.png");
     printf("numb\n");
     printf ("%lu\n", NumberOfFour (HashT));
 

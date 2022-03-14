@@ -34,6 +34,13 @@ unsigned long long Hash (const char* str)
         hash = (hash << 5) + (hash << 16) - hash  + c;
     return hash;
 }
+//==================================================================================
+struct node *ListInit (void)
+{
+    struct node *top = calloc (1, sizeof (struct node));
+    return top;
+}
+//==================================================================================
 
 //==================================================================================
 
@@ -236,19 +243,25 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
     unsigned long long words_hash = 0;
     size_t numb_of_four = 0;
     struct node *cur = 0;
+    struct node *cmp_node = 0;
 
     for (size_t i = 0; i < HashT->size; i++)
     {
         if (HashT->lists_ar[i])
         {
             cur = HashT->lists_ar[i]->next;
+            cmp_node = cur;
             words_hash = HashT->hash_func (cur->word) % HashT->size;
-            while (cur->next && words_hash == HashT->hash_func (cur->word) % HashT->size)
+            while (cmp_node && words_hash == HashT->hash_func (cmp_node->word) % HashT->size)
             {
-                if (strcmp (cur->word, cur->next->word) == 0)
-                    numb_of_four += 1;
-                cur = cur->next;
-                words_hash = HashT->hash_func (cur->word);
+                while (cur->next && words_hash == HashT->hash_func (cur->word) % HashT->size)
+                {
+                    if (strcmp (cmp_node->word, cur->next->word) == 0)
+                        numb_of_four += 1;
+                    cur = cur->next;
+                }
+                cmp_node = cmp_node->next;
+                cur = HashT->lists_ar[i]->next;
             }
         }
     }
@@ -292,15 +305,10 @@ struct Hashtable *FillHashtable (struct Hashtable *HashT, char **buf, size_t N)
     char   *temp_str = calloc (100, sizeof(char));
     size_t i         = 0;
 
-    /*for (i = 0; i < N; i++)
-        printf("[%s] ", buf[i]);
-*/
     for (size_t first = 0; first < N; first++)
     {
-        /*if (first / 1000 != (first - 1)/1000)*/
         for (size_t second = 0; second < N; second++)
         {
-            //printf ("first = %lu, second = %lu\n", first, second);
             i = 0;
             while (temp_str[i] != 0)
             {
@@ -313,18 +321,6 @@ struct Hashtable *FillHashtable (struct Hashtable *HashT, char **buf, size_t N)
                 strcat (temp_str, buf[second]);
                 HashtableInsert (HashT, temp_str);
             }
-/*          
-            while (temp_str[i] != 0)
-            {
-                temp_str[i] = 0;
-                i++;
-            }
-            
-            memcpy (temp_str, buf[second], strlen(buf[second]) * sizeof(char));
-            strcat (temp_str, buf[first]);
-            HashtableInsert (HashT, temp_str);
-
-*/
         }
     }
     free (temp_str);
