@@ -261,6 +261,7 @@ size_t NumOfWord (struct Hashtable* HashT, char* word)//cringe
 
 size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблице и проверяем коллизии
 {
+    printf ("%llu\n", HashT->size);
     unsigned long long words_hash = 0;
     size_t numb_of_four   = 0;
     size_t cnt            = 0;
@@ -268,11 +269,13 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
     struct node *cmp_node = 0;
     struct node *top      = 0;
     struct node *last     = 0;
+    struct node *runner   = 0;
 
     top = ListInit ();
     last = top;
     for (size_t i = 0; i < HashT->size; i++)
     {
+        //printf ("i ====================== %lu\n", i);
         if (HashT->lists_ar[i])
         {
             //printf("---------------\n[%lu]\n", i);
@@ -281,10 +284,22 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
             words_hash = i;
             while (cmp_node && words_hash == HashT->hash_func (cmp_node->word) % HashT->size)
             {
+                //printf ("285\n");
+                //printf ("number_of_four = %lu\n", numb_of_four);
                 if (ListCount (top, cmp_node) == 0)
                 {
                     last = ListInsert (last, strlen (cmp_node->word), cmp_node->word);
-                    cnt = ListCount (HashT->lists_ar[i], cmp_node);
+                    //=====================================
+                    cnt = 0;
+                    runner = HashT->lists_ar[i]->next;
+                    while (runner && HashT->hash_func (runner->word) % HashT->size == words_hash)
+                    {
+                        //printf ("293\n");
+                        if (nodecmp (runner, cmp_node) == 0)
+                            cnt += 1;
+                        runner = runner->next;
+                    }
+                    //=====================================
                     if (cnt > 1)
                     {
                         numb_of_four += (cnt * (cnt - 1)) / 2;
