@@ -8,15 +8,19 @@ struct node {
     struct node *next;
 };
 
+struct Hashtable_elem {
+    struct node *next;
+    size_t capacity;
+};
+
 struct Hashtable {
-    struct node **lists_ar;
+    struct Hashtable_elem **lists_ar;
     struct node  *list_head;
     struct node  *list_tail;
     unsigned long long size;
     unsigned long long inserts;
     unsigned long long (*hash_func)(const char*);
 };
-
 
 void DtStart (FILE* dotfile)
 {
@@ -57,7 +61,6 @@ void DtSetNodes (FILE* dotfile, struct node *node, struct Hashtable *HashT)
 
 void DtSetDependence (FILE* dotfile, struct Hashtable *HashT)
 {
-    unsigned long long words_hash = 0;
     struct node        *cur       = 0;
 
 
@@ -76,11 +79,13 @@ void DtSetDependence (FILE* dotfile, struct Hashtable *HashT)
         if (HashT->lists_ar[i])
         {
             cur = HashT->lists_ar[i]->next;
-            words_hash = HashT->hash_func (cur->word) % HashT->size;
-            while (cur->next && words_hash == HashT->hash_func (cur->next->word)%HashT->size)
+            
+            size_t j = 0;
+            while (cur->next && j < HashT->lists_ar[i]->capacity - 1)
             {
                 fprintf (dotfile, "Node%p->", cur);
                 cur = cur->next;
+                j++;
             }
             if (cur != HashT->lists_ar[i]->next)
             {

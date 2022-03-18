@@ -8,8 +8,13 @@ struct node {
     struct node *next;
 };
 
+struct Hashtable_elem {
+    struct node *next;
+    size_t capacity;
+};
+
 struct Hashtable {
-    struct node **lists_ar;
+    struct Hashtable_elem **lists_ar;
     struct node  *list_head;
     struct node  *list_tail;
     unsigned long long size;
@@ -23,10 +28,21 @@ int nodecmp (struct node* node1, struct node* node2);
 struct node *ListInsert (struct node *last, size_t str_len, char* word);
 void DeleteNodeAft (struct Hashtable *HashT, struct node* last);
 void DeleteList (struct node* top);
+void ClearStr (char* str);
+void ListDump (struct node *top);
 struct Hashtable *FillHashtable (struct Hashtable *HashT, char **buf, size_t N);
 
 
-
+//==================================================================================
+void ClearStr (char* str)
+{
+    size_t i = 0;
+    while (str[i] != 0)
+    {
+        str[i] = 0;
+        i++;
+    }
+}
 //==================================================================================
 unsigned long long Hash (const char* str)
 {
@@ -64,13 +80,25 @@ int nodecmp (struct node* node1, struct node* node2)
     return strcmp (node1->word, node2->word);
 }
 //==================================================================================
+void ListDump (struct node *top)
+{
+    struct node *cur = top->next;
+
+    while (cur)
+    {
+        printf ("\"%s\"[%llu]->", cur->word, Hash (cur->word) % 200);
+        cur = cur->next;
+    }
+    printf("\n\n");
+}
+//==================================================================================
 
 struct Hashtable* HashTableInit (size_t size, unsigned long long (*hash_f)(const char*))
 {
     assert (size);
     struct Hashtable* HashT = calloc (1, sizeof(struct Hashtable));
     HashT->list_head        = calloc (1, sizeof (struct node));
-    HashT->lists_ar         = calloc (size, sizeof(struct node*));
+    HashT->lists_ar         = calloc (size, sizeof(struct Hashtable_elem*));
     assert (HashT);
     assert (HashT->lists_ar);
     assert (HashT->list_head);
@@ -161,7 +189,7 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
 
     if (HashT->lists_ar[hash] == 0)
     {
-        HashT->lists_ar[hash] = calloc (1, sizeof(struct node));
+        HashT->lists_ar[hash] = calloc (1, sizeof(struct Hashtable_elem));
         assert (HashT->lists_ar[hash]);
         
         HashT->lists_ar[hash]->next = ListInsert (HashT->list_tail, str_len, word);
@@ -169,10 +197,15 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
     }
     else
     {
-        struct node* cur = HashT->lists_ar[hash];
-
-        while (cur != HashT->list_tail && HashT->hash_func(cur->next->word) % HashT->size == hash)
+        struct node* cur = HashT->lists_ar[hash]->next;
+        
+        size_t i = 0;
+        while (cur->next && i < HashT->lists_ar[hash]->capacity - 1)
+        {
             cur = cur->next;
+            i++;
+        }
+        assert (cur);
         if (cur == HashT->list_tail)
         {
             ListInsert (HashT->list_tail, str_len, word);
@@ -184,7 +217,8 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
         }
     }
 
-    HashT->inserts += 1;
+    HashT->lists_ar[hash]->capacity += 1;
+    HashT->inserts                  += 1;
     return HashT;
 }
 
@@ -234,18 +268,17 @@ struct Hashtable* HashTableResize (struct Hashtable* HashT)
 
 //==================================================================================
 
-size_t NumOfWord (struct Hashtable* HashT, char* word)//cringe
+size_t NumOfWord (struct Hashtable* HashT, char* word)
 {
 
     size_t N  = 0;
     unsigned long long word_hash = HashT->hash_func (word) % HashT->size;
-    struct node* cur_node        = HashT->lists_ar[word_hash];
-
-    if (cur_node == 0)
+    if (HashT->lists_ar[word_hash] == 0)
         return 0;
 
-    cur_node = cur_node->next;
-    while (cur_node != HashT->list_tail && HashT->hash_func (cur_node->word) % HashT->size == word_hash)
+    struct node* cur_node        = HashT->lists_ar[word_hash]->next;
+    
+    for (size_t i = 0; i < HashT->lists_ar[word_hash]->capacity - 1; i++)
     {
 
         if (strcmp(word, cur_node->word) == 0)
@@ -259,9 +292,8 @@ size_t NumOfWord (struct Hashtable* HashT, char* word)//cringe
     return N;
 }
 
-size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблице и проверяем коллизии
+size_t NumberOfFour (struct Hashtable *HashT)
 {
-    unsigned long long words_hash = 0;
     size_t numb_of_four   = 0;
     size_t cnt            = 0;
     struct node *cur      = 0;
@@ -279,8 +311,8 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
 
             cur = HashT->lists_ar[i]->next;
             cmp_node = cur;
-            words_hash = i;
-            while (cmp_node && words_hash == HashT->hash_func (cmp_node->word) % HashT->size)
+
+            for (size_t j = 0; j < HashT->lists_ar[i]->capacity - 1; j++)
             {
                 if (ListCount (top, cmp_node) == 0)
                 {
@@ -288,11 +320,15 @@ size_t NumberOfFour (struct Hashtable *HashT)//идём по хэштаблиц�
                     //=====================================
                     cnt = 0;
                     runner = HashT->lists_ar[i]->next;
-                    while (runner && HashT->hash_func (runner->word) % HashT->size == words_hash)
+                    size_t k = 0;
+                    while (runner && k < HashT->lists_ar[i]->capacity)
                     {
                         if (nodecmp (runner, cmp_node) == 0)
+                        {
                             cnt += 1;
+                        }
                         runner = runner->next;
+                        k++;
                     }
                     //=====================================
                     if (cnt > 1)
@@ -337,25 +373,19 @@ void HashTDump (struct Hashtable *HashT, char *name)
     memcpy (command, "dot dump.dot -T png -o ", 23 * sizeof(char));
     strcat (command, name);
     system (command);
-    system ("rm dump.dot");
+    //system ("rm dump.dot");
     free (command);
 }
 //==================================================================================
 struct Hashtable *FillHashtable (struct Hashtable *HashT, char **buf, size_t N)
 {
     char   *temp_str = calloc (100, sizeof(char));
-    size_t i         = 0;
 
     for (size_t first = 0; first < N; first++)
     {
         for (size_t second = 0; second < N; second++)
         {
-            i = 0;
-            while (temp_str[i] != 0)
-            {
-                temp_str[i] = 0;
-                i++;
-            }
+            ClearStr(temp_str);
             if (second != first)
             {
                 strcat (temp_str, buf[first]);
