@@ -65,9 +65,9 @@ first_text = []
 second_text = []
 
 N1 = FileToBuf ("tests/src/1.src", first_text)
-N2 = FileToBuf ("tests/src/2.src", second_text)
+N2 = FileToBuf ("tests/src/3.src", second_text)
 
-test_file = open ("tests/dat/5.dat", "w")
+test_file = open ("tests/dat/6.dat", "w")
 
 #---------------------------get_text------------------------------
 words = CrushingWords (first_text, N1)
