@@ -9,6 +9,6 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 -fchkp-first-field-has-own-bounds -fchkp-narrow-to-innermost-array 
 all:
 LX:
-	$(CC) -g $(dCFLAGS) LX.c -o LX.out
+	$(CC) -g $(CFLAGS) LX.c -o LX.out
 clean:
 	rm -rf *.o *.out *.txt
