@@ -24,6 +24,13 @@ struct lex_array_t {
     int capacity;
 };
 
+int number_input (const char *buf);
+size_t skip_spaces (const char* buf, size_t ip);
+size_t Input (char **buf, char *filename);
+void End (char *buf, size_t char_num);
+size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t ip);
+struct lex_array_t *lex_string (const char *buf, size_t char_num);
+
 int number_input (const char *buf)
 {
     size_t i = 0;
@@ -49,7 +56,7 @@ size_t Input (char **buf, char *filename)
 
     struct stat stat_buf;
     stat(filename, &stat_buf);
-    size_t char_num = stat_buf.st_size;
+    size_t char_num = (size_t)stat_buf.st_size;
 
     *buf = calloc (char_num, sizeof (char));
     fread (*buf, sizeof(char), char_num, f);
@@ -129,7 +136,7 @@ struct lex_array_t *lex_string (const char *buf, size_t char_num)
     for (size_t i = 0; i < char_num; i++)
     {
         i = lex_insert (lex, buf, i);
-        if (i == -1)
+        if (i == 666)
         {
             lex = 0;
             break;
