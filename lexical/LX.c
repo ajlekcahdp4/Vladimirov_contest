@@ -38,7 +38,7 @@ int number_input (const char *buf)
 
 size_t skip_spaces (const char* buf, size_t ip)
 {
-    while (buf[ip] == ' ' && buf[ip] == '\t', buf[ip] == '\n', buf[ip] == '\r')
+    while (buf[ip] == ' ' || buf[ip] == '\t' || buf[ip] == '\n' || buf[ip] == '\r')
         ip += 1;
     return ip;
 }
@@ -67,10 +67,10 @@ void End (char *buf, size_t char_num)
 }
 
 
-int lex_insert (struct lex_array_t *lex, const char *buf, size_t ip)
+size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t ip)
 {
     ip = skip_spaces (buf, ip);
-    printf ("<%c>\n", buf[ip]);
+
     if (buf[ip] == '(')
     {
         lex->size += 1;
@@ -115,7 +115,7 @@ int lex_insert (struct lex_array_t *lex, const char *buf, size_t ip)
     }
     else
     {
-        return -1;
+        return 666;
     }
     return ip;
 } 
@@ -149,7 +149,6 @@ int main (int argc, char **argv)
         printf ("ERROR\n");
         abort();
     }
-    printf ("%d\n", lex->size);
     
     End (buf, char_num);
     return 0;
