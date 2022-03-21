@@ -10,4 +10,4 @@ all:
 LX:
 	$(CC) -g $(CFLAGS) LX.c -o LX.out
 clean:
-	rm -rf *.o *.out *.txt
+	rm -rf *.o *.out *.txt vgcore.*
