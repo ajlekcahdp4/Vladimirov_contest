@@ -24,42 +24,44 @@ struct lex_array_t {
     int capacity;
 };
 
-int number_input (const char *buf);
-size_t skip_spaces (const char* buf, size_t ip);
-size_t Input (char **buf, char *filename);
-void End (char *buf, size_t char_num);
-size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t ip);
-struct lex_array_t *lex_string (const char *buf, size_t char_num);
+int number_input (const char *buf, int *i);
+void print_lex (struct lex_array_t *lex);
+int skip_spaces (const char* buf, int ip);
+int Input (char **buf, char *filename);
+void End (char *buf, struct lex_array_t *lex);
+int lex_insert (struct lex_array_t *lex, const char *buf, int i, int ip);
+struct lex_array_t *lex_string (const char *buf);
 
-int number_input (const char *buf)
+int number_input (const char *buf, int *i)
 {
-    size_t i = 0;
     int val = 0;
-    while (isdigit (buf[i]))
+    while (isdigit (buf[*i]))
     {
-        val = val * 10 + buf[i] - '0';
-        i += 1;
+        val = val * 10 + buf[*i] - '0';
+        *i += 1;
     }
     return val;
 }
 
-size_t skip_spaces (const char* buf, size_t ip)
+int skip_spaces (const char* buf, int ip)
 {
     while (buf[ip] == ' ' || buf[ip] == '\t' || buf[ip] == '\n' || buf[ip] == '\r')
         ip += 1;
     return ip;
 }
 
-size_t Input (char **buf, char *filename)
+int Input (char **buf, char *filename)
 {
+    int char_num = 0;
     FILE *f = fopen (filename, "r");
+    assert (f);
 
     struct stat stat_buf;
     stat(filename, &stat_buf);
-    size_t char_num = (size_t)stat_buf.st_size;
+    char_num = (int)stat_buf.st_size;
 
-    *buf = calloc (char_num, sizeof (char));
-    fread (*buf, sizeof(char), char_num, f);
+    *buf = calloc ((size_t)(char_num + 1), sizeof (char));
+    fread (*buf, sizeof(char), (size_t)char_num, f);
     printf ("%s\n", *buf);
 
     fclose (f);
@@ -67,96 +69,158 @@ size_t Input (char **buf, char *filename)
     return char_num;
 }
 
-void End (char *buf, size_t char_num)
+void End (char *buf, struct lex_array_t *lex)
 {
-
+    free (lex->lexems);
+    free (lex);
     free (buf);
 }
 
 
-size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t ip)
+void print_lex (struct lex_array_t *lex)
 {
-    ip = skip_spaces (buf, ip);
+    for (int i = 0; i < lex->size; i++)
+    {
+        switch (lex->lexems[i].kind )
+        {
+        case BRACE:
+            switch (lex->lexems[i].lex.b)
+            {
+                case LBRAC:
+                    printf ("LBRAC ");
+                    break;
+                case RBRAC:
+                    printf ("RBRAC ");
+                    break;
+                default:
+                    printf ("ERROR\n");
+                    abort ();
+                    break;
+            }
+            break;
+        case OP:
+            switch (lex->lexems[i].lex.op)
+            {
+                case ADD:
+                    printf ("PLUS ");
+                    break;
+                case SUB:
+                    printf ("MINUS ");
+                    break;
+                case MUL:
+                    printf ("MUL ");
+                    break;
+                case DIV:
+                    printf ("DIV ");
+                    break;
+                default:
+                    printf ("ERROR\n");
+                    abort ();
+                    break;
+            }
+            break;
+        case NUM:
+            printf ("NUMBER:%d ", lex->lexems[i].lex.num);
+            break;
+        default:
+            printf ("ERROR\n");
+            abort ();
+            break;
+        }   
+    }
+    printf ("\n");
 
-    if (buf[ip] == '(')
+}
+
+int lex_insert (struct lex_array_t *lex, const char *buf, int i, int ip)
+{
+    i = skip_spaces (buf, i);
+
+    if (buf[i] == '(')
     {
         lex->size += 1;
         lex->lexems[ip].kind  = BRACE;
         lex->lexems[ip].lex.b = LBRAC;
     }
-    else if (buf[ip] == ')')
+    else if (buf[i] == ')')
     {
         lex->size += 1;
         lex->lexems[ip].kind  = BRACE;
         lex->lexems[ip].lex.b = RBRAC;
     }
-    else if (buf[ip] == '*')
+    else if (buf[i] == '*')
     {
         lex->size += 1;
         lex->lexems[ip].kind   = OP;
         lex->lexems[ip].lex.op = MUL;
     }
-    else if (buf[ip] == '/')
+    else if (buf[i] == '/')
     {
         lex->size += 1;
         lex->lexems[ip].kind   = OP;
         lex->lexems[ip].lex.op = DIV;
     }
-    else if (buf[ip] == '+')
+    else if (buf[i] == '+')
     {
         lex->size += 1;
         lex->lexems[ip].kind   = OP;
         lex->lexems[ip].lex.op = ADD;
     }
-    else if (buf[ip] == '-')
+    else if (buf[i] == '-')
     {
         lex->size += 1;
         lex->lexems[ip].kind   = OP;
         lex->lexems[ip].lex.op = SUB;
     }
-    else if (isdigit (buf[ip]))
+    else if (isdigit (buf[i]))
     {
         lex->size += 1;
         lex->lexems[ip].kind = NUM;
-        lex->lexems[ip].lex.num = number_input (buf + ip);
+        lex->lexems[ip].lex.num = number_input (buf, &i);
     }
     else
     {
-        return 666;
+        return -1;
     }
-    return ip;
+    return i;
 } 
 
-struct lex_array_t *lex_string (const char *buf, size_t char_num)
+struct lex_array_t *lex_string (const char *buf)
 {
+    int ip = 0;
+    int size = 0;
     struct lex_array_t *lex = calloc (1, sizeof (struct lex_array_t));
     lex->lexems   = calloc (16, sizeof (struct lexem_t));
     lex->capacity = 16;
+    size = 0;
+    ip = 0;
 
-    for (size_t i = 0; i < char_num; i++)
+    for (int i = 0; buf[i] != '\0' && buf[i] != EOF; i++)
     {
-        i = lex_insert (lex, buf, i);
-        if (i == 666)
+        i = lex_insert (lex, buf, i, ip);
+        if (i == -1)
         {
-            lex = 0;
-            break;
+            printf ("ERROR\n");
+            abort ();
         }
+        size += 1;
+        ip += 1;
     }
+    lex->size = size;
     return lex;
 }
 
 int main (int argc, char **argv)
 {
     char *buf = 0;
-    size_t char_num = Input (&buf, argv[argc - 1]);
     struct lex_array_t *lex = 0;
-    lex = lex_string (buf, char_num);
-    if (lex == 0)
-    {
-        printf ("ERROR\n");
-        abort();
-    }
+
+    Input (&buf, argv[argc - 1]);
     
-    End (buf, char_num);
+    lex = lex_string (buf);
+
+    print_lex (lex);
+    
+    End (buf, lex);
     return 0;
 }
