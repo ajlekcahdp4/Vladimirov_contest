@@ -3,3 +3,4 @@
 *.png
 *.dot
 .vscode
+vgcore.*
