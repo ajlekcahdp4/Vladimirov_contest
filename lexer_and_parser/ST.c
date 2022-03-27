@@ -6,13 +6,11 @@
 #include "dump_tree/dump_tree.h"
 
 
-#define MAXLEN 1024
-
 //======================================================================================
 //=========================================LX===========================================
 //======================================================================================
 
-
+#define MAXLEN 1024
 
 enum lexem_kind_t { OP, BRACE, NUM };
 enum operation_t { ADD, SUB, MUL, DIV };
@@ -56,9 +54,6 @@ struct lex_array_t *lex_string (const char *buf);
 struct lex_array_t *lex_resize (struct lex_array_t *lex);
 
 
-
-
-void TreePrint (size_t size, struct node_t* top, char* str);
 //=======================================================================================
 struct lexer_state {
     int cur;
@@ -89,6 +84,7 @@ struct node_t *build_syntax_tree(struct lex_array_t lexarr);
 int calc_result(struct node_t *top);
 void free_syntax_tree(struct node_t * top);
 void tree_dump (struct node_t *top);
+void TreePrint (size_t size, struct node_t* top, char* str);    
 
 void TreePrint (size_t size, struct node_t* top, char* str)
 {
@@ -103,7 +99,7 @@ void TreePrint (size_t size, struct node_t* top, char* str)
 
     if (cur->left != 0)
     {
-        str_n = calloc (size*2, sizeof(char));
+        str_n = calloc (strlen (str) + 3, sizeof(char));
         assert(str_n);
         memcpy (str_n, str, strlen (str));
         strcat (str_n, ".1");
@@ -112,7 +108,7 @@ void TreePrint (size_t size, struct node_t* top, char* str)
     }
     if (cur->right != 0)
     {
-        str_n = calloc (size*2, sizeof(char));
+        str_n = calloc (strlen (str) + 3, sizeof(char));
         assert (str_n);
         memcpy (str_n, str, strlen (str));
         strcat (str_n, ".2");
@@ -133,34 +129,20 @@ int main ()
     lex = lex_string (buf);
     if (lex->size > 0)
     {
-        print_lex (lex);
         struct node_t *top = build_syntax_tree (*lex);
-        TreePrint (1, top, "1");
+        #if 0
+        TreePrint (2, top, "1");
+        #endif
         tree_dump (top);
         printf ("%d\n", calc_result (top));
+        free_syntax_tree (top);
         End (buf, lex);
     }
     return 0;
 }
 
 
-#if 0
-int main ()
-{
-    char *buf = 0;
-    struct lex_array_t *lex = 0;
 
-    Input (&buf);
-    
-    lex = lex_string (buf);
-    if (lex->size > 0)
-    {
-        print_lex (lex);
-        End (buf, lex);
-    }
-    return 0;
-}
-#endif
 
 
 //======================================================================================
@@ -562,8 +544,6 @@ int calc_result(struct node_t *top) //inorder calculation
         val_l = calc_result (cur->left);
     if (cur->right)
         val_r = calc_result (cur->right);
-    printf ("val_l = %d\n", val_l);
-    printf ("val_r = %d\n", val_r);
 
     if (top->data.kind == OP)
     {
@@ -591,9 +571,12 @@ void tree_dump (struct node_t *top)
     system ("dot dump.dot -T png -o dump.png");
 }
 
-#if 0
+
 void free_syntax_tree(struct node_t * top) 
 {
-  // TODO: your code here
+    if (top->left)
+        free_syntax_tree (top->left);
+    if (top->right)
+        free_syntax_tree (top->right);
+    free (top);
 }
-#endif
