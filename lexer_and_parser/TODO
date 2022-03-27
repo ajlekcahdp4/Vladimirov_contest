@@ -1,2 +1,4 @@
 - add tree_free function (done 27.03)
-- solve problem with braces
+- solve problem with braces (done 27.03)
+- add errors handling
+- div to files
