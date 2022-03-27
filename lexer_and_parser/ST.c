@@ -3,8 +3,14 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
-#include "dump_tree/dump_tree.h"
 
+
+#define DUMP
+#undef DUMP
+
+#ifdef DUMP
+#include "dump_tree/dump_tree.h"
+#endif
 
 //======================================================================================
 //=========================================LX===========================================
@@ -86,58 +92,32 @@ void free_syntax_tree(struct node_t * top);
 void tree_dump (struct node_t *top);
 void TreePrint (size_t size, struct node_t* top, char* str);    
 
-void TreePrint (size_t size, struct node_t* top, char* str)
-{
-    char* str_n = 0;
-    struct node_t* cur = 0;
-
-    assert(top);
-    assert (str);
-    
-    cur = top;
-    printf("%s\n", str);
-
-    if (cur->left != 0)
-    {
-        str_n = calloc (strlen (str) + 3, sizeof(char));
-        assert(str_n);
-        memcpy (str_n, str, strlen (str));
-        strcat (str_n, ".1");
-        TreePrint (size, cur->left, str_n);
-        free(str_n);
-    }
-    if (cur->right != 0)
-    {
-        str_n = calloc (strlen (str) + 3, sizeof(char));
-        assert (str_n);
-        memcpy (str_n, str, strlen (str));
-        strcat (str_n, ".2");
-        TreePrint (size, cur->right, str_n);
-        free(str_n);
-    }
-}
 
 
 int main ()
 {
-
     char *buf = 0;
     struct lex_array_t *lex = 0;
+    struct node_t *top = NULL;
 
     Input (&buf);
     
     lex = lex_string (buf);
-    if (lex->size > 0)
-    {
-        struct node_t *top = build_syntax_tree (*lex);
-        #if 0
-        TreePrint (2, top, "1");
-        #endif
-        tree_dump (top);
-        printf ("%d\n", calc_result (top));
-        free_syntax_tree (top);
-        End (buf, lex);
-    }
+    if (lex->size <= 0)
+        return 0;
+
+    top = build_syntax_tree (*lex);
+    if (top == NULL)
+        return 0;
+    
+    #ifdef DUMP
+    TreePrint (2, top, "1");
+    tree_dump (top);
+    #endif
+    
+    printf ("%d\n", calc_result (top));
+    free_syntax_tree (top);
+    End (buf, lex);
     return 0;
 }
 
@@ -150,13 +130,11 @@ int main ()
 int number_input (const char *buf, int *i)
 {
     int val = 0;
-    //printf ("number_input, i = %d\n", *i);
     while (isdigit (buf[*i]))
     {
         val = val * 10 + buf[*i] - '0';
         *i += 1;
     }
-    //printf ("end input_number, %d\n", *i);
     return val;
 }
 
@@ -184,7 +162,6 @@ int Input (char **buf)
         len += 1;
     }
 
-    //printf ("<%s>\n", *buf);
     
 
     return len;
@@ -350,15 +327,6 @@ struct lex_array_t *lex_string (const char *buf)
 //=========================================ST===========================================
 //======================================================================================
 
-// Grammar:
-
-
-
-
-
-
-
-
 struct node_t *parse_term  (struct lexer_state *pstate);
 struct node_t *parse_expr (struct lexer_state *pstate);
 struct node_t *parse_factor (struct lexer_state *pstate);
@@ -473,7 +441,7 @@ struct node_t *parse_expr (struct lexer_state *pstate)
 
 
 
-// term ::= f {*, /} term | factor
+// term ::= factor {*, /} factor | factor
 struct node_t *parse_term  (struct lexer_state *pstate)
 {
     struct node_t *lhs  = NULL;
@@ -508,12 +476,19 @@ struct node_t *parse_term  (struct lexer_state *pstate)
 // factor ::= ( expr ) | number
 struct node_t *parse_factor (struct lexer_state *pstate)
 {
+    struct node_t *expr = NULL;
     if (is_l_brace (pstate))
     {
         pstate->cur += 1;
-        struct node_t *expr = parse_expr (pstate);
+        expr = parse_expr (pstate);
+        if (expr == NULL)
+            return 0;
         if (!is_r_brace (pstate))
-            abort ();
+        {
+            printf ("ERROR\n");
+            return 0;
+        }
+        pstate->cur += 1;   
         return expr;
     }
     if (is_number (pstate))
@@ -530,8 +505,16 @@ struct node_t *parse_factor (struct lexer_state *pstate)
 struct node_t *build_syntax_tree(struct lex_array_t lexarr)
 {
     int cur = 0;
+    struct node_t *res = NULL;
     struct lexer_state ls = {cur, lexarr};
-    return parse_expr (&ls);
+    
+    res = parse_expr (&ls);
+    if (ls.cur != ls.lexarr.size && res != 0)
+    {
+        printf ("ERROR\n");
+        return 0;
+    }
+    return res;
 }
 
 int calc_result(struct node_t *top) //inorder calculation
@@ -559,7 +542,7 @@ int calc_result(struct node_t *top) //inorder calculation
     return top->data.lex.num;
 }
 
-
+#ifdef DUMP
 void tree_dump (struct node_t *top)
 {
     FILE *dotfile = fopen ("dump.dot", "w");
@@ -569,6 +552,38 @@ void tree_dump (struct node_t *top)
     DtEnd (dotfile);
     fclose (dotfile);
     system ("dot dump.dot -T png -o dump.png");
+}
+#endif
+
+void TreePrint (size_t size, struct node_t* top, char* str)
+{
+    char* str_n = 0;
+    struct node_t* cur = 0;
+
+    assert(top);
+    assert (str);
+    
+    cur = top;
+    printf("%s\n", str);
+
+    if (cur->left != 0)
+    {
+        str_n = calloc (strlen (str) + 3, sizeof(char));
+        assert(str_n);
+        memcpy (str_n, str, strlen (str));
+        strcat (str_n, ".1");
+        TreePrint (size, cur->left, str_n);
+        free(str_n);
+    }
+    if (cur->right != 0)
+    {
+        str_n = calloc (strlen (str) + 3, sizeof(char));
+        assert (str_n);
+        memcpy (str_n, str, strlen (str));
+        strcat (str_n, ".2");
+        TreePrint (size, cur->right, str_n);
+        free(str_n);
+    }
 }
 
 
