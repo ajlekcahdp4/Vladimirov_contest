@@ -14,4 +14,4 @@ ST: tree_dump
 tree_dump:
 	$(CC) -g -c $(CFLAGS) dump_tree/dump_tree.c 
 clean:
-	rm -rf *.o *.out *.txt vgcore.*
+	rm -rf *.o *.out *.txt vgcore.* *.dot *.png
