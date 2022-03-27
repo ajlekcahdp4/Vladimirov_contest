@@ -34,7 +34,7 @@ void DtStart (FILE* dotfile)
 void DtSetNode (FILE* dotfile, struct node_t *node)
 {
     fprintf (dotfile, "Node%p [style=filled, fillcolor = \"palegreen\" ,label=\"", node);
-    printf ("kind = %d, union = %d\n", node->data.kind, node->data.lex.num);
+    printf ("kind = %u, union = %d\n", node->data.kind, node->data.lex.num);
     switch (node->data.kind)
     {
         case OP:
@@ -60,6 +60,7 @@ void DtSetNode (FILE* dotfile, struct node_t *node)
         case NUM:
             fprintf (dotfile, "%d", node->data.lex.num);
             break;
+        case BRACE:
         default:
             printf ("ERROR\n");
             break;

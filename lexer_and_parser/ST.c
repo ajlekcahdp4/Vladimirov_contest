@@ -58,8 +58,13 @@ struct lex_array_t *lex_resize (struct lex_array_t *lex);
 
 
 
-//void TreePrint (int size, struct node_t* top, char* str);
+void TreePrint (size_t size, struct node_t* top, char* str);
 //=======================================================================================
+struct lexer_state {
+    int cur;
+    struct lex_array_t lexarr;
+};
+
 
 enum node_kind_t { NODE_OP, NODE_VAL};
 
@@ -69,13 +74,23 @@ struct node_t {
   struct lexem_t data;
 };
 
+
+struct lexem_t current (struct lexer_state *pstate);
+int is_add (struct lexer_state *pstate);
+int is_mul_div (struct lexer_state *pstate);
+int is_plus_minus (struct lexer_state *pstate);
+int is_mul (struct lexer_state *pstate);
+int is_l_brace (struct lexer_state *pstate);
+int is_r_brace (struct lexer_state *pstate);
+int is_number (struct lexer_state *pstate);
+
+
 struct node_t *build_syntax_tree(struct lex_array_t lexarr);
-
 int calc_result(struct node_t *top);
-
 void free_syntax_tree(struct node_t * top);
+void tree_dump (struct node_t *top);
 
-void TreePrint (int size, struct node_t* top, char* str)
+void TreePrint (size_t size, struct node_t* top, char* str)
 {
     char* str_n = 0;
     struct node_t* cur = 0;
@@ -358,10 +373,7 @@ struct lex_array_t *lex_string (const char *buf)
 
 
 
-struct lexer_state {
-    int cur;
-    struct lex_array_t lexarr;
-};
+
 
 
 
@@ -419,7 +431,7 @@ int is_l_brace ( struct lexer_state *pstate)
     struct lexem_t cur = current (pstate);
     if (cur.kind != BRACE)
         return 0;
-    if (cur.lex.op != LBRAC)
+    if (cur.lex.b != LBRAC)
         return 0;
     return 1;
 }
@@ -429,7 +441,7 @@ int is_r_brace ( struct lexer_state *pstate)
     struct lexem_t cur = current (pstate);
     if (cur.kind != BRACE)
         return 0;
-    if (cur.lex.op != RBRAC)
+    if (cur.lex.b != RBRAC)
         return 0;
     return 1;
 }
@@ -530,6 +542,7 @@ struct node_t *parse_factor (struct lexer_state *pstate)
         pstate->cur += 1;
         return num;
     }
+    return NULL;
 }
 
 struct node_t *build_syntax_tree(struct lex_array_t lexarr)
@@ -578,7 +591,9 @@ void tree_dump (struct node_t *top)
     system ("dot dump.dot -T png -o dump.png");
 }
 
+#if 0
 void free_syntax_tree(struct node_t * top) 
 {
   // TODO: your code here
 }
+#endif
