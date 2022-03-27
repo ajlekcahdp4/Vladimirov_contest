@@ -510,8 +510,8 @@ struct node_t *parse_factor (struct lexer_state *pstate)
 {
     if (is_l_brace (pstate))
     {
-        struct node_t *expr = parse_expr (pstate);
         pstate->cur += 1;
+        struct node_t *expr = parse_expr (pstate);
         if (!is_r_brace (pstate))
             abort ();
         return expr;
