@@ -120,6 +120,7 @@ int main ()
     {
         print_lex (lex);
         struct node_t *top = build_syntax_tree (*lex);
+        TreePrint (1, top, "1");
         tree_dump (top);
         printf ("%d\n", calc_result (top));
         End (buf, lex);
@@ -442,62 +443,77 @@ int is_number (struct lexer_state *pstate)
 }
 
 
-// expr ::= term {+, -} expr | term
+// expr ::= term {+, -} term | term
 struct node_t *parse_expr (struct lexer_state *pstate)
 {
-    struct node_t *lhs = parse_term (pstate);
-    if (pstate->cur >= pstate->lexarr.size)
-         return lhs;
-    if (is_plus_minus (pstate))
+    struct node_t *lhs  = NULL;
+    struct node_t *rhs  = NULL;
+    struct node_t *expr = NULL;
+    struct node_t *temp = NULL;
+
+    lhs = parse_term (pstate);
+    expr = lhs;
+
+    while (pstate->cur < pstate->lexarr.size && current(pstate).kind == OP && is_plus_minus (pstate))
     {
-        enum operation_t op = SUB;
+        temp = calloc (1, sizeof (struct node_t));
+        temp->data.kind   = OP;
+        temp->data.lex.op = SUB;
         if (is_add (pstate))
-            op = ADD; 
+            temp->data.lex.op = ADD;
         pstate->cur += 1;
-        struct node_t *rhs = parse_expr (pstate);
+
+        rhs = parse_term (pstate);
+        #if 1
         if (rhs == NULL)
-            abort();
-        struct node_t *expr = calloc (1, sizeof (struct node_t));
-        expr->left = lhs;
-        expr->right = rhs;
-        expr->data.kind = NODE_OP;
-        expr->data.lex.op = op;   
-        return expr;
+            return NULL;
+        #endif
+        
+        temp->left  = expr;
+        temp->right = rhs;
+        expr = temp;
     }
-    return lhs;
+
+    return expr;
 }
-    
-// term ::= factor {*, /} term | factor
+
+
+
+// term ::= f {*, /} term | factor
 struct node_t *parse_term  (struct lexer_state *pstate)
 {
-    struct node_t *lhs = parse_factor (pstate);
-    if (pstate->cur >= pstate->lexarr.size)
-        return lhs;
-    if (is_mul_div (pstate))
+    struct node_t *lhs  = NULL;
+    struct node_t *rhs  = NULL;
+    struct node_t *term = NULL;
+    struct node_t *temp = NULL;
+    lhs = parse_factor (pstate);
+    term = lhs;
+
+    while (pstate->cur < pstate->lexarr.size && current(pstate).kind == OP && is_mul_div (pstate))
     {
-        enum operation_t op = DIV;
+        temp = calloc (1, sizeof (struct node_t));
+        temp->data.kind   = OP;
+        temp->data.lex.op = DIV;
         if (is_mul (pstate))
-            op = MUL; 
+            temp->data.lex.op = MUL;
         pstate->cur += 1;
-        struct node_t *rhs = parse_term (pstate);
+
+        rhs = parse_factor (pstate);
+        #if 1
         if (rhs == NULL)
-            abort();
-        struct node_t *term = calloc (1, sizeof (struct node_t));
-        term->left = lhs;
-        term->right = rhs;
-        term->data.kind = NODE_OP;
-        term->data.lex.op = op;    
-        return term;
+            return NULL;
+        #endif
+        temp->left  = term;
+        temp->right = rhs;
+        term = temp;
     }
-    return lhs;
+
+    return term;
 }
 
 // factor ::= ( expr ) | number
 struct node_t *parse_factor (struct lexer_state *pstate)
 {
-    #if 0
-    struct node_t *lhs = parse_factor (pstate);
-    #endif
     if (is_l_brace (pstate))
     {
         struct node_t *expr = parse_expr (pstate);
@@ -535,11 +551,19 @@ int calc_result(struct node_t *top) //inorder calculation
         val_r = calc_result (cur->right);
     printf ("val_l = %d\n", val_l);
     printf ("val_r = %d\n", val_r);
-    if (top->data.lex.op == ADD)
-        return val_l + val_r;
-    else if (top->data.lex.op == SUB)
-        return val_l - val_r;
-    
+
+    if (top->data.kind == OP)
+    {
+        if (top->data.lex.op == ADD)
+            return val_l + val_r;
+        else if (top->data.lex.op == SUB)
+            return val_l - val_r;
+        else if (top->data.lex.op == MUL)
+            return val_l * val_r;
+        else if (top->data.lex.op == DIV)
+            return val_l / val_r;
+    }
+    return top->data.lex.num;
 }
 
 
