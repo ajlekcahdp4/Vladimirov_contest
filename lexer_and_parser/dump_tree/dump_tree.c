@@ -28,7 +28,7 @@ struct node_t {
 void DtStart (FILE* dotfile)
 {
     fprintf (dotfile, "digraph G {\n");
-    fprintf (dotfile, "rankdir = LR\n");
+    fprintf (dotfile, "rankdir = TB\n");
 }
 
 void DtSetNode (FILE* dotfile, struct node_t *node)
