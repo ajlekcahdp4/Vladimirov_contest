@@ -9,5 +9,7 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 all:
 LX:
 	$(CC) -g $(CFLAGS) LX.c -o LX.out
+ST:
+	$(CC) -g $(CFLAGS) ST.c -o ST.out
 clean:
 	rm -rf *.o *.out *.txt vgcore.*
