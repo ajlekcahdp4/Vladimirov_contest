@@ -9,7 +9,9 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 all:
 LX:
 	$(CC) -g $(CFLAGS) LX.c -o LX.out
-ST:
-	$(CC) -g $(CFLAGS) ST.c -o ST.out
+ST: tree_dump
+	$(CC) -g $(CFLAGS) ST.c dump_tree.o -o ST.out
+tree_dump:
+	$(CC) -g -c $(CFLAGS) dump_tree/dump_tree.c 
 clean:
 	rm -rf *.o *.out *.txt vgcore.*
