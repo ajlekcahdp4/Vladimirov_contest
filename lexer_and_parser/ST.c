@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
+#include "dump_tree/dump_tree.h"
 
 
 #define MAXLEN 1024
@@ -55,6 +56,9 @@ struct lex_array_t *lex_string (const char *buf);
 struct lex_array_t *lex_resize (struct lex_array_t *lex);
 
 
+
+
+//void TreePrint (int size, struct node_t* top, char* str);
 //=======================================================================================
 
 enum node_kind_t { NODE_OP, NODE_VAL};
@@ -71,6 +75,37 @@ int calc_result(struct node_t *top);
 
 void free_syntax_tree(struct node_t * top);
 
+void TreePrint (int size, struct node_t* top, char* str)
+{
+    char* str_n = 0;
+    struct node_t* cur = 0;
+
+    assert(top);
+    assert (str);
+    
+    cur = top;
+    printf("%s\n", str);
+
+    if (cur->left != 0)
+    {
+        str_n = calloc (size*2, sizeof(char));
+        assert(str_n);
+        memcpy (str_n, str, strlen (str));
+        strcat (str_n, ".1");
+        TreePrint (size, cur->left, str_n);
+        free(str_n);
+    }
+    if (cur->right != 0)
+    {
+        str_n = calloc (size*2, sizeof(char));
+        assert (str_n);
+        memcpy (str_n, str, strlen (str));
+        strcat (str_n, ".2");
+        TreePrint (size, cur->right, str_n);
+        free(str_n);
+    }
+}
+
 
 int main ()
 {
@@ -85,6 +120,7 @@ int main ()
     {
         print_lex (lex);
         struct node_t *top = build_syntax_tree (*lex);
+        tree_dump (top);
         printf ("%d\n", calc_result (top));
         End (buf, lex);
     }
@@ -430,7 +466,7 @@ struct node_t *parse_expr (struct lexer_state *pstate)
     }
     return lhs;
 }
-
+    
 // term ::= factor {*, /} term | factor
 struct node_t *parse_term  (struct lexer_state *pstate)
 {
@@ -473,6 +509,7 @@ struct node_t *parse_factor (struct lexer_state *pstate)
     if (is_number (pstate))
     {
         struct node_t *num = calloc (1, sizeof (struct node_t));
+        num->data.kind = NUM;
         num->data.lex.num = current(pstate).lex.num;
         pstate->cur += 1;
         return num;
@@ -503,6 +540,18 @@ int calc_result(struct node_t *top) //inorder calculation
     else if (top->data.lex.op == SUB)
         return val_l - val_r;
     
+}
+
+
+void tree_dump (struct node_t *top)
+{
+    FILE *dotfile = fopen ("dump.dot", "w");
+    DtStart (dotfile);
+    DtSetNodes (dotfile, top);
+    DtSetDependencies (dotfile, top);
+    DtEnd (dotfile);
+    fclose (dotfile);
+    system ("dot dump.dot -T png -o dump.png");
 }
 
 void free_syntax_tree(struct node_t * top) 
