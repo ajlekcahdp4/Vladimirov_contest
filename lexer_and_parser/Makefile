@@ -8,7 +8,7 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 -Wno-missing-field-initializers -Wnarrowing -Wvarargs -fcheck-new -fstack-check -fstrict-overflow -flto-odr-type-merging
 
 
-PARSER = bu_parser.c
+PARSER = bu_parser
 
 all:
 LX:
@@ -20,11 +20,11 @@ main:
 lex:
 	$(CC) -g -c $(CFLAGS) lexer/lexer.c
 parse:
-	$(CC) -g -c $(CFLAGS) parser/$(PARSER)
+	$(CC) -g -c $(CFLAGS) parser/$(PARSER).c
 tree_dump:
 	$(CC) -g -c $(CFLAGS) dump_tree/dump_tree.c
 
 LexParse: main lex parse tree_dump
-	$(CC) -g $(CFLAGS) main.o lexer.o bu_parser.o dump_tree.o -o LexParse.out
+	$(CC) -g $(CFLAGS) main.o lexer.o $(PARSER).o dump_tree.o -o LexParse.out
 clean:
 	rm -rf *.o *.out *.txt vgcore.* *.dot *.png
