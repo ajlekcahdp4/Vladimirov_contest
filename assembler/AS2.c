@@ -5,6 +5,7 @@
 #include "mk.h"
 
 
+
 int is_movi (unsigned data)
 {
     return !((data >> 7) & 0x1);
@@ -135,8 +136,6 @@ int main ()
     int res = 0;
     unsigned data = 0;
     char Mnemonic[64] = {0};
-    char OUT[MAXLEN] = {0};
-    char *pr = OUT;
 
     for ( ; ; )
     {
@@ -145,8 +144,6 @@ int main ()
             break;
         decode (data, Mnemonic);
         printf ("%s\n", Mnemonic);
-        memcpy (pr, Mnemonic, strlen (Mnemonic) * sizeof (char));
-        pr += strlen (Mnemonic) * sizeof (char);
     }
 
     return 0;
