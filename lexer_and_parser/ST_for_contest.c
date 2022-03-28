@@ -290,6 +290,8 @@ struct lex_array_t *lex_string (const char *buf)
     int size = 0;
     struct lex_array_t *lex = calloc (1, sizeof (struct lex_array_t));
     lex->lexems   = calloc (16, sizeof (struct lexem_t));
+    assert (lex);
+    assert (lex->lexems);
     lex->capacity = 16;
     size = 0;
     ip = 0;
@@ -410,6 +412,7 @@ struct node_t *parse_expr (struct lexer_state *pstate)
     while (pstate->cur < pstate->lexarr.size && current(pstate).kind == OP && is_plus_minus (pstate))
     {
         temp = calloc (1, sizeof (struct node_t));
+        assert (temp);
         temp->data.kind   = OP;
         temp->data.lex.op = SUB;
         if (is_add (pstate))
@@ -445,6 +448,7 @@ struct node_t *parse_term  (struct lexer_state *pstate)
     while (pstate->cur < pstate->lexarr.size && current(pstate).kind == OP && is_mul_div (pstate))
     {
         temp = calloc (1, sizeof (struct node_t));
+        assert (temp);
         temp->data.kind   = OP;
         temp->data.lex.op = DIV;
         if (is_mul (pstate))
@@ -485,6 +489,7 @@ struct node_t *parse_factor (struct lexer_state *pstate)
     if (is_number (pstate))
     {
         struct node_t *num = calloc (1, sizeof (struct node_t));
+        assert (num);
         num->data.kind = NUM;
         num->data.lex.num = current(pstate).lex.num;
         pstate->cur += 1;
