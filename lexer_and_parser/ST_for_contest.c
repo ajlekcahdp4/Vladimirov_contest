@@ -48,6 +48,14 @@ struct node_data_t {
 };
 #endif
 
+int number_input (const char *buf, int *i);
+void print_lex (struct lex_array_t *lex);
+int skip_spaces (const char* buf, int ip);
+int Input (char **buf);
+void End (char *buf, struct lex_array_t *lex);
+int lex_insert (struct lex_array_t *lex, const char *buf, int i, int ip);
+struct lex_array_t *lex_string (const char *buf);
+struct lex_array_t *lex_resize (struct lex_array_t *lex);
 
 
 
