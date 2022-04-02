@@ -1,5 +1,5 @@
 CC = gcc
-CFAGS = -Wall -Werror -Wextra
+CFLAGS = -Wall -Werror -Wextra
 DEBUG = -g
 
 

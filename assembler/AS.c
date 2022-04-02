@@ -5,6 +5,10 @@
 #include "lexer.h"
 #include "parser.h"
 
+
+
+
+
 int main ()
 {
     char *buf = NULL;
@@ -13,6 +17,7 @@ int main ()
     free (buf);
     Translate (lex);
     
+
     free(lex->lexarr);
     free(lex);
 

@@ -1,10 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
+#include <assert.h>
 #include <ctype.h>
-#include "lexer.h"
 
+//=====================================================================================
+//======================================lexer.h=======================================
+//=====================================================================================
+enum reg_t {  A = 0, B, C, D, RLAST };
+
+enum opcode_t { MOVI = 0, ADD = 8, SUB = 9, MUL = 10, DIV = 11, IN, OUT };
+
+enum lexem_kind { CMD, REG, VAL };
+
+struct lexem_t 
+{
+    union 
+    {
+        enum opcode_t CMD;
+        enum reg_t REG;
+        int val;
+    }lex;
+    enum lexem_kind kind;
+};
+
+struct lex_array_t 
+{
+    struct lexem_t *lexarr;
+    size_t capacity;
+    size_t size;
+};
+
+//=====================================================================================
+//======================================lexer.c========================================
+//=====================================================================================
 
 #define START_SIZE 32
 size_t Input (char **buf)
@@ -60,7 +89,7 @@ int *number_input (const char *buf, size_t *i)
     }
     if (val == NULL)
     {
-        fprintf (stderr, "ERROR: unknown lexem\n");
+        fprintf (stderr, "ERROR\n");
         exit(0);
     }
     return val;
@@ -100,7 +129,7 @@ void print_lex (struct lex_array_t *lex)
                     printf ("OUT ");
                     break;
                 default:
-                    printf ("ERROR: unknown command in print\n");
+                    printf ("ERROR\n");
                     break;
             }
             break;
@@ -120,7 +149,7 @@ void print_lex (struct lex_array_t *lex)
                     printf ("D ");
                     break;
                 default:
-                    printf ("ERROR: unknown register in print\n");
+                    printf ("ERROR\n");
                     break;
             }
             break;
@@ -128,7 +157,7 @@ void print_lex (struct lex_array_t *lex)
             printf ("%d ", lex->lexarr[i].lex.val);
             break;
         default:
-            printf ("ERROR: unknown lexem   type in print\n");
+            printf ("ERROR\n");
             break;
         }   
     }
@@ -151,7 +180,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 4;
         if (!isspace(buf[i]))
         {
-            fprintf(stderr, "ERROR: no space after command\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
     }
@@ -163,7 +192,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 3;
         if (!isspace(buf[i]))
         {
-            fprintf(stderr, "ERROR: no space after command\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
     }
@@ -175,7 +204,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 3;
         if (!isspace(buf[i]))
         {
-            fprintf(stderr, "ERROR: no space after command\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
     }
@@ -187,7 +216,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 3;
         if (!isspace(buf[i]))
         {
-            fprintf(stderr, "ERROR: no space after command\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
     }
@@ -199,7 +228,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 3;
         if (!isspace(buf[i]))
         {
-            fprintf(stderr, "ERROR: no space after command\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
     }
@@ -211,7 +240,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 2;
         if (!isspace(buf[i]))
         {
-            fprintf(stderr, "ERROR: no space after command\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
     }    
@@ -223,7 +252,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 3;
         if (!isspace(buf[i]))
         {
-            fprintf(stderr, "ERROR: no space after command\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
     }
@@ -232,9 +261,10 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].kind = REG;
         lex->lexarr[ip].lex.REG = A;
         lex->size += 1;
+        i += 1;
         if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != '\n')
         {
-            fprintf(stderr, "ERROR: no space after register\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
         if (buf[i] == ',')
@@ -248,7 +278,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 1;
         if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != '\n')
         {
-            fprintf(stderr, "ERROR: no space after register\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
         if (buf[i] == ',')
@@ -262,7 +292,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         i += 1;
         if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != '\n')
         {
-            fprintf(stderr, "ERROR: no space after register\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
         if (buf[i] == ',')
@@ -277,7 +307,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != '\n')
         {
             printf ("\n<%d>\n", buf[i]);
-            fprintf(stderr, "ERROR: no space after register\n");
+            fprintf(stderr, "ERROR\n");
             exit(0);
         }
         if (buf[i] == ',')
@@ -314,4 +344,170 @@ struct lex_array_t *lex_string (const char *buf)
         i = lex_insert (lex, buf, i, ip);
     }
     return lex;
+}
+
+//=====================================================================================
+//======================================parser.c=======================================
+//=====================================================================================
+
+
+int Parse (struct lex_array_t *lex, unsigned char *bin, size_t *lex_ip, size_t *bin_ip)
+{
+    if (*lex_ip >= lex->size - 1)
+        return 0;
+    if (lex->lexarr[*lex_ip].kind != CMD)
+    {
+        fprintf (stderr, "ERROR\n");
+        exit(0);
+    }
+    switch (lex->lexarr[*lex_ip].lex.CMD)
+    {
+    case MOVI:
+    {
+        if (lex->lexarr[*lex_ip + 1].kind != VAL)
+        {
+            fprintf (stderr, "ERROR\n");
+            exit(0);
+        }
+        bin[*bin_ip] = (unsigned char)(lex->lexarr[*lex_ip + 1].lex.val & 0x7F);
+        *bin_ip += 1;
+        *lex_ip += 2;
+        break;
+    }
+    case ADD:
+    {
+        unsigned char r1;
+        unsigned char r2;
+        if (lex->lexarr[*lex_ip + 1].kind != REG || lex->lexarr[*lex_ip + 2].kind != REG)
+        {
+            fprintf (stderr, "ERROR\n");
+            exit(0);
+        }
+        r1 = (unsigned char)lex->lexarr[*lex_ip + 1].lex.REG;
+        r2 = (unsigned char)lex->lexarr[*lex_ip + 2].lex.REG;
+
+        bin[*bin_ip] = (unsigned char)(0x80 | r1 << 2 | r2);
+        *bin_ip += 1;
+        *lex_ip += 3;
+        break;
+    }
+    case SUB:
+    {
+        unsigned char r1;
+        unsigned char r2;
+        if (lex->lexarr[*lex_ip + 1].kind != REG || lex->lexarr[*lex_ip + 2].kind != REG)
+        {
+            fprintf (stderr, "ERROR\n");
+            exit(0);
+        }
+        r1 = (unsigned char)lex->lexarr[*lex_ip + 1].lex.REG;
+        r2 = (unsigned char)lex->lexarr[*lex_ip + 2].lex.REG;
+
+        bin[*bin_ip] = (unsigned char)(0x90 | r1 << 2 | r2);
+        *bin_ip += 1;
+        *lex_ip += 3;
+        break;
+    }
+    case MUL:
+    {
+        unsigned char r1;
+        unsigned char r2;
+        if (lex->lexarr[*lex_ip + 1].kind != REG || lex->lexarr[*lex_ip + 2].kind != REG)
+        {
+            fprintf (stderr, "ERROR\n");
+            exit(0);
+        }
+        r1 = (unsigned char)lex->lexarr[*lex_ip + 1].lex.REG;
+        r2 = (unsigned char)lex->lexarr[*lex_ip + 2].lex.REG;
+
+        bin[*bin_ip] = (unsigned char)(0xA0 | r1 << 2 | r2);
+        *bin_ip += 1;
+        *lex_ip += 3;
+        break;
+    }
+    case DIV:
+    {
+        unsigned char r1;
+        unsigned char r2;
+        if (lex->lexarr[*lex_ip + 1].kind != REG || lex->lexarr[*lex_ip + 2].kind != REG)
+        {
+            fprintf (stderr, "ERROR\n");
+            exit(0);
+        }
+        r1 = (unsigned char)lex->lexarr[*lex_ip + 1].lex.REG;
+        r2 = (unsigned char)lex->lexarr[*lex_ip + 2].lex.REG;
+
+        bin[*bin_ip] = (unsigned char)(0xB0 | r1 << 2 | r2);
+        *bin_ip += 1;
+        *lex_ip += 3;
+        break;
+    }
+    case IN:
+    {
+        unsigned char r;
+        if (lex->lexarr[*lex_ip + 1].kind != REG)
+        {
+            fprintf (stderr, "ERROR\n");
+            exit(0);
+        }
+        r = (unsigned char)lex->lexarr[*lex_ip + 1].lex.REG;
+
+        bin[*bin_ip] = (unsigned char)(0xC0 | r);
+        *bin_ip += 1;
+        *lex_ip += 2;
+        break;
+    }
+    case OUT:
+    {
+        unsigned char r;
+        if (lex->lexarr[*lex_ip + 1].kind != REG)
+        {
+            fprintf (stderr, "ERROR\n");
+            exit(0);
+        }
+        r = (unsigned char)lex->lexarr[*lex_ip + 1].lex.REG;
+
+        bin[*bin_ip] = (unsigned char)(0xC4 | r);
+        *bin_ip += 1;
+        *lex_ip += 2;
+        break;
+    }
+    }
+    return 0;
+}
+
+void Translate (struct lex_array_t *lex)
+{
+    size_t lex_ip = 0;
+    size_t bin_ip = 0;
+    unsigned char *bin = calloc (lex->size, sizeof (unsigned char));
+
+    for (; lex_ip < lex->size - 1; )
+    {
+        Parse (lex, bin, &lex_ip, &bin_ip);
+    }
+    for (size_t i = 0; i < bin_ip; i++)
+    {
+        printf ("0x%x ", bin[i]);
+    }
+    free (bin);
+}
+
+//=====================================================================================
+//======================================AS.c===========================================
+//=====================================================================================
+int main ()
+{
+    char *buf = NULL;
+    struct lex_array_t *lex = NULL;
+    Input (&buf);
+    lex = lex_string (buf);
+    free (buf);
+    Translate (lex);
+    
+
+    free(lex->lexarr);
+    free(lex);
+
+    return 0;
 }

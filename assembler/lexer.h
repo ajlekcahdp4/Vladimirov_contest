@@ -26,6 +26,7 @@ struct lex_array_t
 
 size_t Input (char **buf);
 struct lex_array_t *lex_string (const char *buf);
+void print_lex (struct lex_array_t *lex);
 
 
 
