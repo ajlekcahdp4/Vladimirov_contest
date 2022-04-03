@@ -7,15 +7,16 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 -Wsuggest-final-types -Wswitch-default -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code -Wunused -Wvariadic-macros 		\
 -Wno-missing-field-initializers -Wnarrowing -Wvarargs -fcheck-new -fstack-check -fstrict-overflow -flto-odr-type-merging
 
+OPTIMISATION = -O2
 all: HWH
 HWH: main HT dump_
-	$(CC) $(CFLAGS) -g main.o hashtable.o dump.o -o HWH.out
+	$(CC) $(CFLAGS) $(OPTIMISATION) -g main.o hashtable.o dump.o -o HWH.out
 main:
-	$(CC) $(CFLAGS) -g -c main.c
+	$(CC) $(CFLAGS) $(OPTIMISATION) -g -c main.c
 HT:
-	$(CC) $(CFLAGS) -g -c hashtable/hashtable.c
+	$(CC) $(CFLAGS) $(OPTIMISATION) -g -c hashtable/hashtable.c
 dump_:
-	$(CC) $(CFLAGS) -g -c dump/dump.c
+	$(CC) $(CFLAGS) $(OPTIMISATION) -g -c dump/dump.c
 TestGen:
 	python3 tests/TestGen.py
 clean:
