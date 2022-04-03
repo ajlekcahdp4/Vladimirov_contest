@@ -8,16 +8,19 @@ CFLAGS = -Wall -Wextra -Werror -Walloc-zero -Walloca -Walloca-larger-than=8192 -
 -Wno-missing-field-initializers -Wnarrowing -Wvarargs -fcheck-new -fstack-check -fstrict-overflow -flto-odr-type-merging
 
 OPTIMISATION = -O2
+DEBUG = -g
+
+
 all: HWH
-HWH: main HT dump_
-	$(CC) $(CFLAGS) $(OPTIMISATION) -g main.o hashtable.o dump.o -o HWH.out
-main:
-	$(CC) $(CFLAGS) $(OPTIMISATION) -g -c main.c
-HT:
-	$(CC) $(CFLAGS) $(OPTIMISATION) -g -c hashtable/hashtable.c
-dump_:
-	$(CC) $(CFLAGS) $(OPTIMISATION) -g -c dump/dump.c
+HWH: MAIN_T HT_T DUMP_T
+	$(CC) $(CFLAGS) $(OPTIMISATION) $(DEBUG) main.o hashtable.o dump.o -o HWH.out
+MAIN_T:
+	$(CC) $(CFLAGS) $(OPTIMISATION) $(DEBUG) -c main.c
+HT_T:
+	$(CC) $(CFLAGS) $(OPTIMISATION) $(DEBUG) -c hashtable/hashtable.c
+DUMP_T:
+	$(CC) $(CFLAGS) $(OPTIMISATION) $(DEBUG) -c dump/dump.c
 TestGen:
 	python3 tests/TestGen.py
 clean:
-	rm -rf *.o *.out *.png
+	rm -rf *.o *.out *.png *.dot *.dis *.x
