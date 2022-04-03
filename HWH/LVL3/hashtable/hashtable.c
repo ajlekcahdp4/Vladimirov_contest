@@ -3,48 +3,79 @@
 #include <string.h>
 #include <assert.h>
 
-struct node {
-    char* word;
-    struct node *next;
+struct node_t {
+    unsigned ip1;
+    unsigned ip2;
+    struct node_t *next;
 };
 
 struct Hashtable_elem {
-    struct node *next;
-    size_t capacity;
+    struct node_t *next;
+    unsigned capacity;
 };
 
 struct Hashtable {
     struct Hashtable_elem **lists_ar;
-    struct node  *list_head;
-    struct node  *list_tail;
+    struct node_t  *list_head;
+    struct node_t  *list_tail;
     unsigned long long size;
     unsigned long long inserts;
-    unsigned long long (*hash_func)(const char*);
+    unsigned long long (*HashFunc)(struct buffer*, struct node_t*);
+    int (*Cmp)(struct buffer*, struct node_t*, struct node_t*);
 };
 
-struct node *ListInit (void);
-size_t ListCount (struct node *top, struct node *aim_node);
-int nodecmp (struct node* node1, struct node* node2);
-struct node *ListInsert (struct node *last, size_t str_len, char* word);
-void DeleteNodeAft (struct Hashtable *HashT, struct node* last);
-void DeleteList (struct node* top);
+struct node_t *ListInit (void);
+size_t ListCount (struct node_t *top, struct node_t *aim_node);
+int nodecmp (struct node_t* node1, struct node_t* node2);
+struct node_t *ListInsert (struct node_t *last, size_t str_len, char* word);
+void DeleteNodeAft (struct Hashtable *HashT, struct node_t* last);
+void DeleteList (struct node_t* top);
 void ClearStr (char* str);
-void ListDump (struct node *top);
-struct Hashtable *FillHashtable (struct Hashtable *HashT, char **buf, size_t N);
+void ListDump (struct node_t *top);
+unsigned long long djb2 (const char* str);
 
 
 //==================================================================================
-void ClearStr (char* str)
+//=================================STRUCT_FUNCTIONS=================================
+//==================================================================================
+#define MAX_STR_LEN 128
+
+int NodesCmp (struct buffer *buf, struct node_t *node1, struct node_t *node2)
 {
-    size_t i = 0;
-    while (str[i] != 0)
-    {
-        str[i] = 0;
-        i++;
-    }
+    int res = 0;
+    char *temp_str_1 = calloc (MAX_STR_LEN, sizeof(char));
+    char *temp_str_2 = calloc (MAX_STR_LEN, sizeof(char));
+    strcat (temp_str_1, buf->str_array[node1->ip1]);
+    strcat (temp_str_1, buf->str_array[node1->ip2]);
+
+    strcat (temp_str_2, buf->str_array[node1->ip1]);
+    strcat (temp_str_2, buf->str_array[node1->ip2]);
+
+    res = strcmp (temp_str_1, temp_str_2);
+    
+    free (temp_str_1);
+    free (temp_str_2);
+    return res;
 }
 //==================================================================================
-unsigned long long Hash (const char* str)
+
+unsigned long long HashNode (struct buffer *buf, struct node_t *node)
+{
+    unsigned long long hash = 0;
+    char *temp_str = calloc (MAX_STR_LEN, sizeof(char));
+    strcat (temp_str, buf->str_array[node->ip1]);
+    strcat (temp_str, buf->str_array[node->ip2]);
+
+    hash = djb2 (temp_str);
+
+    free (temp_str);
+    return hash;
+}
+
+#undef MAX_STR_LEN
+//==================================================================================
+
+unsigned long long djb2 (const char* str)
 {
     unsigned long long hash = 0;
     unsigned long long c = 0;
@@ -52,20 +83,24 @@ unsigned long long Hash (const char* str)
         hash = (hash << 5) + (hash << 16) - hash  + c;
     return hash;
 }
+
+
 //==================================================================================
-struct node *ListInit (void)
+//===================================LIST_FUNCTIONS=================================
+//==================================================================================
+struct node_t *ListInit (void)
 {
-    struct node *top = calloc (1, sizeof (struct node));
+    struct node_t *top = calloc (1, sizeof (struct node_t));
     return top;
 }
 //==================================================================================
-size_t ListCount (struct node *top, struct node *aim_node)
+size_t ListCount (struct node_t *top, struct node_t *aim_node)
 {
     assert (top);
     assert (aim_node);
 
     size_t cnt = 0;
-    struct node *cur = top;
+    struct node_t *cur = top;
     while (cur)
     {
         if (cur != top && nodecmp (cur, aim_node) == 0)
@@ -74,15 +109,11 @@ size_t ListCount (struct node *top, struct node *aim_node)
     }
     return cnt;
 }
+
 //==================================================================================
-int nodecmp (struct node* node1, struct node* node2)
+void ListDump (struct node_t *top)
 {
-    return strcmp (node1->word, node2->word);
-}
-//==================================================================================
-void ListDump (struct node *top)
-{
-    struct node *cur = top->next;
+    struct node_t *cur = top->next;
 
     while (cur)
     {
@@ -97,24 +128,24 @@ struct Hashtable* HashTableInit (size_t size, unsigned long long (*hash_f)(const
 {
     assert (size);
     struct Hashtable* HashT = calloc (1, sizeof(struct Hashtable));
-    HashT->list_head        = calloc (1, sizeof (struct node));
+    HashT->list_head        = calloc (1, sizeof (struct node_t));
     HashT->lists_ar         = calloc (size, sizeof(struct Hashtable_elem*));
     assert (HashT);
     assert (HashT->lists_ar);
     assert (HashT->list_head);
     HashT->size      = size;
-    HashT->hash_func = hash_f;
+    HashT->HashFunc = hash_f;
     HashT->list_tail = HashT->list_head;
 
     return HashT;
 }
 //==================================================================================
-struct node *ListInsert (struct node *last, size_t str_len, char* word)
+struct node_t *ListInsert (struct node_t *last, size_t str_len, char* word)
 {
-    struct node *cur = last;
+    struct node_t *cur = last;
     if (cur->next == 0)
     {
-        cur->next       = calloc (1, sizeof (struct node));
+        cur->next       = calloc (1, sizeof (struct node_t));
         cur->next->word = calloc (str_len + 1, sizeof (char));
 
         assert (cur->next);
@@ -124,7 +155,7 @@ struct node *ListInsert (struct node *last, size_t str_len, char* word)
     }
     else
     {
-        struct node *new_node = calloc (1, sizeof (struct node));
+        struct node_t *new_node = calloc (1, sizeof (struct node_t));
         new_node->word        = calloc (str_len + 1, sizeof (char));
 
         assert (new_node);
@@ -139,14 +170,14 @@ struct node *ListInsert (struct node *last, size_t str_len, char* word)
 }
 //==================================================================================
 
-void DeleteNodeAft (struct Hashtable *HashT, struct node* last)
+void DeleteNodeAft (struct Hashtable *HashT, struct node_t* last)
 {
     assert (last->next);
 
     if (HashT->list_tail == last->next)
         HashT->list_tail = last;
 
-    struct node* cur = last->next;
+    struct node_t* cur = last->next;
     last->next       = cur->next;
 
     free (cur->word);
@@ -155,10 +186,10 @@ void DeleteNodeAft (struct Hashtable *HashT, struct node* last)
 
 //==================================================================================
 
-void DeleteList (struct node* top)
+void DeleteList (struct node_t* top)
 {
-    struct node* cur_node = top;
-    struct node* next_node = top;
+    struct node_t* cur_node = top;
+    struct node_t* next_node = top;
     while (cur_node->next != 0)
     {
         next_node = cur_node->next;
@@ -174,30 +205,33 @@ void DeleteList (struct node* top)
 
 
 
-struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
+struct Hashtable* HashtableInsert (struct Hashtable* HashT, struct buffer *buf, size_t ip1, size_t ip2) //done
 {
     assert (HashT);
-    assert (word);
+    assert (buf);
     if ((float)HashT->inserts / (float)HashT->size >= 0.7)
     {
         HashT = HashTableResize (HashT);
     }
 
+    struct node_t *new_node = calloc (1, sizeof(char));
+    new_node->ip1 = ip1;
+    new_node->ip2 = ip2;
 
-    size_t str_len = strlen (word);
-    unsigned long long hash = HashT->hash_func (word) % HashT->size;
+
+    unsigned long long hash = HashT->HashFunc (buf, new_node) % HashT->size;
 
     if (HashT->lists_ar[hash] == 0)
     {
         HashT->lists_ar[hash] = calloc (1, sizeof(struct Hashtable_elem));
         assert (HashT->lists_ar[hash]);
         
-        HashT->lists_ar[hash]->next = ListInsert (HashT->list_tail, str_len, word);
+        HashT->lists_ar[hash]->next = ListInsert (HashT->list_tail, new_node);
         HashT->list_tail            = HashT->list_tail->next;
     }
     else
     {
-        struct node* cur = HashT->lists_ar[hash]->next;
+        struct node_t* cur = HashT->lists_ar[hash]->next;
         
         size_t i = 0;
         while (cur->next && i < HashT->lists_ar[hash]->capacity - 1)
@@ -208,12 +242,12 @@ struct Hashtable* HashtableInsert (struct Hashtable* HashT, char* word)
         assert (cur);
         if (cur == HashT->list_tail)
         {
-            ListInsert (HashT->list_tail, str_len, word);
+            ListInsert (HashT->list_tail, new_node);
             HashT->list_tail = HashT->list_tail->next;
         }
         else
         {
-            ListInsert (cur, str_len, word);
+            ListInsert (cur, new_node);
         }
     }
 
@@ -235,13 +269,13 @@ struct Hashtable* HashTableResize (struct Hashtable* HashT)
     
     
     HashT-> size *= 2;
-    HashT->lists_ar = calloc (HashT->size, sizeof (struct node*));
+    HashT->lists_ar = calloc (HashT->size, sizeof (struct node_t*));
 
     char* temp_str = 0;
     size_t str_len = 0;
-    struct node *last = HashT->list_tail;
+    struct node_t *last = HashT->list_tail;
     unsigned long long old_inserts = HashT->inserts;
-    struct node* cur = HashT->list_head;
+    struct node_t* cur = HashT->list_head;
     //+++++++++++++++++++++++++++++++++++++++++
     while (cur->next != last)
     {
@@ -276,7 +310,7 @@ size_t NumOfWord (struct Hashtable* HashT, char* word)
     if (HashT->lists_ar[word_hash] == 0)
         return 0;
 
-    struct node* cur_node        = HashT->lists_ar[word_hash]->next;
+    struct node_t* cur_node        = HashT->lists_ar[word_hash]->next;
     
     for (size_t i = 0; i < HashT->lists_ar[word_hash]->capacity - 1; i++)
     {
@@ -296,11 +330,11 @@ size_t NumberOfFour (struct Hashtable *HashT)
 {
     size_t numb_of_four   = 0;
     size_t cnt            = 0;
-    struct node *cur      = 0;
-    struct node *cmp_node = 0;
-    struct node *top      = 0;
-    struct node *last     = 0;
-    struct node *runner   = 0;
+    struct node_t *cur      = 0;
+    struct node_t *cmp_node = 0;
+    struct node_t *top      = 0;
+    struct node_t *last     = 0;
+    struct node_t *runner   = 0;
 
     for (size_t i = 0; i < HashT->size; i++)
     {
@@ -355,7 +389,7 @@ void HashTDump (struct Hashtable *HashT, char *name)
 
     DtStart (dotfile);
     DtSetTitle (dotfile, HashT);
-    struct node *cur = HashT->list_head->next;
+    struct node_t *cur = HashT->list_head->next;
     DtSetBuf (dotfile, HashT);
     while (cur != 0)
     {
@@ -377,30 +411,33 @@ void HashTDump (struct Hashtable *HashT, char *name)
     free (command);
 }
 //==================================================================================
-struct Hashtable *FillHashtable (struct Hashtable *HashT, char **buf, size_t N)
+struct Hashtable *FillHashtable (struct Hashtable *HashT, struct buffer *buf)
 {
-    char   *temp_str = calloc (100, sizeof(char));
-
-    for (size_t first = 0; first < N; first++)
+    for (size_t first = 0; first < buf->size; first++)
     {
-        for (size_t second = 0; second < N; second++)
+        for (size_t second = 0; second < buf->size; second++)
         {
-            ClearStr(temp_str);
-            if (second != first)
-            {
-                strcat (temp_str, buf[first]);
-                strcat (temp_str, buf[second]);
-                HashtableInsert (HashT, temp_str);
-            }
+            if (first != second)
+                HashTableInsert (HashT, buf, first, second);
         }
     }
-    free (temp_str);
+    
     return HashT;
 }
 
 
 
 
+//==================================================================================
+void ClearStr (char* str)
+{
+    size_t i = 0;
+    while (str[i] != '\0')
+    {
+        str[i] = '\0';
+        i++;
+    }
+}
 //==================================================================================
 void DeleteHastable (struct Hashtable* HashT)
 {

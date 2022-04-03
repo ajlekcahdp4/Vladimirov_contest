@@ -1,0 +1,5 @@
+- Rewrite hashtable to one buffer with strings and Hashtable, containing indexes
+    - Rewrite struct Hashtable ( done 03.04 )
+    - Rewrite HashtableInsert ( done 03.04 )
+    - Rewrite ListInsert 
+    - Rewrite HashTableResize
