@@ -8,4 +8,5 @@
         - Rewrite DeleteNodeAft ( done 04.04 )
         - Rewrite DeleteList    ( done 04.04 )
     - Rewrite HashTableResize   ( done 04.04 )
-    - Rewrite Dump
+    - Rewrite Dump              ( done 04.04 )
+    - Debugging

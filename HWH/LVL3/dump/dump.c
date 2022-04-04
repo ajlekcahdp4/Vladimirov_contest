@@ -3,24 +3,27 @@
 
 
 
-struct node {
-    char* word;
-    struct node *next;
+struct node_t {
+    struct node_t *next;
+    unsigned ip1;
+    unsigned ip2;
 };
 
 struct Hashtable_elem {
-    struct node *next;
-    size_t capacity;
+    struct node_t *next;
+    unsigned capacity;
 };
 
 struct Hashtable {
     struct Hashtable_elem **lists_ar;
-    struct node  *list_head;
-    struct node  *list_tail;
+    struct node_t_t  *list_head;
+    struct node_t_t  *list_tail;
     unsigned long long size;
     unsigned long long inserts;
-    unsigned long long (*hash_func)(const char*);
+    unsigned long long (*HashFunc)(struct buffer*, struct node_t*);
+    int (*Cmp)(struct buffer*, struct node_t*, struct node_t*);
 };
+
 
 void DtStart (FILE* dotfile)
 {
@@ -54,14 +57,14 @@ void DtSetBuf (FILE *dotfile, struct Hashtable* HashT)
 
 }
 
-void DtSetNodes (FILE* dotfile, struct node *node, struct Hashtable *HashT)
+void DtSetNodes (FILE* dotfile, struct buffer *buf, struct node_t *node, struct Hashtable *HashT)
 {
-    fprintf (dotfile, "Node%p [shape=record, style=filled, fillcolor = \"palegreen\", label=\"adr\\n%p|word\\n%s|Hash = %llu|next\\n%p\"];\n", node, node, node->word,HashT->hash_func (node->word)%HashT->size, node->next);
+    fprintf (dotfile, "Node%p [shape=record, style=filled, fillcolor = \"palegreen\", label=\"adr\\n%p|%u, %u|Hash = %llu|next\\n%p\"];\n", node, node,  node->ip1, node->ip2, HashT->HashFunc(buf, node) % HashT->size, node->next);
 }
 
 void DtSetDependence (FILE* dotfile, struct Hashtable *HashT)
 {
-    struct node        *cur       = 0;
+    struct node_t        *cur       = 0;
 
 
     fprintf (dotfile, "\n");
