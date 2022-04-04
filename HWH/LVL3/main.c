@@ -6,8 +6,8 @@
 
 struct buffer *TextInput (size_t N);
 size_t ReadWord  (char **temp_str);
-void   End       (struct Hashtable* HashT, char** buf, size_t N);
-
+void End (struct Hashtable* HashT, struct buffer *buf);
+struct buffer *BufferResize (struct buffer *buf);
 
 
 //==================================================================================
@@ -26,12 +26,12 @@ size_t ReadWord (char **temp_str)
 
     while (c != ' ' && c != '\n' && c != EOF && c != '\0')
     {
-        temp_str[i] = (char)c;
+        (*temp_str)[i] = (char)c;
         i++;
         c = getchar();
     }
-    temp_str[i] = '\0';
-    return strlen (temp_str);
+    (*temp_str)[i] = '\0';
+    return strlen (*temp_str);
 }   
 #undef MAX_STR_LEN
 
@@ -39,7 +39,7 @@ struct buffer *BufferResize (struct buffer *buf)
 {
     buf->capacity *= 2;
     buf->str_array = realloc (buf->str_array, buf->capacity * sizeof (char*));
-    for (int i = buf->size; i < buf->capacity; )
+    for (size_t i = buf->size; i < buf->capacity; i++)
         buf->str_array[i] = NULL;
     return buf;
 }
@@ -48,7 +48,6 @@ struct buffer *BufferResize (struct buffer *buf)
 #define START_BUFFER_CAPACITY 1024
 struct buffer *TextInput (size_t N)
 {
-    size_t str_len  = 0;
     char  *temp_str = NULL;
 
     struct buffer *buf = calloc (1, sizeof(struct buffer));
@@ -61,7 +60,7 @@ struct buffer *TextInput (size_t N)
     {
         if (buf->size == buf->capacity)
             BufferResize (buf);
-        str_len = ReadWord (&temp_str);
+        ReadWord (&temp_str);
         buf->str_array[i] = temp_str;
         buf->size += 1;
     }
@@ -72,13 +71,13 @@ struct buffer *TextInput (size_t N)
 
 
 
-void End (struct Hashtable* HashT, char** buf, size_t N)
+void End (struct Hashtable* HashT, struct buffer *buf)
 {
     DeleteHastable (HashT);
-    for (size_t i = 0; i < N; i++)
+    for (size_t i = 0; i < buf->size; i++)
     {
-        if (buf[i] != 0)
-            free (buf[i]);
+        if (buf->str_array[i] != 0)
+            free (buf->str_array[i]);
     }
     free(buf);
 }
@@ -102,15 +101,15 @@ int main ()
     assert (buf);
     TextInput (N);
 
-    HashT = HashTableInit (START_SIZE_OF_HASH_TABLE, HashNode);
+    HashT = HashTableInit (START_SIZE_OF_HASH_TABLE, HashNode, NodesCmp);
     //printf ("fill\n");
     FillHashtable (HashT, buf);
     //HashTDump (HashT, "dump.png");
     //printf("numb\n");
-    printf ("%lu\n", NumberOfFour (HashT));
+    printf ("%lu\n", NumberOfFour (buf, HashT));
 
 
-    End (HashT, buf, N);
+    End (HashT, buf);
     return 0;
 }
 #undef START_SIZE_OF_HASH_TABLE
