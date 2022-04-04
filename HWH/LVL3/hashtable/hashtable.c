@@ -1,6 +1,9 @@
-#include "hashtable.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "hashtable.h"
+#include "../dump/dump.h"
 
 struct node_t {
     struct node_t *next;
@@ -325,7 +328,7 @@ size_t NumberOfFour (struct buffer *buf, struct Hashtable *HashT)
 //==================================================================================
 #ifdef DUMP_INCLUDED
 
-void HashTDump (struct Hashtable *HashT, char *name)
+void HashTDump (struct Hashtable *HashT, struct buffer *buf, char *name)
 {
     FILE *dotfile  = fopen ("dump.dot", "w");
 
@@ -335,7 +338,7 @@ void HashTDump (struct Hashtable *HashT, char *name)
     DtSetBuf (dotfile, HashT);
     while (cur != 0)
     {
-        DtSetNodes (dotfile, cur, HashT);
+        DtSetNodes (dotfile, buf, cur, HashT);
         cur = cur->next;
     }
     fprintf (dotfile, "\n\n\n");

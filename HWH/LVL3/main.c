@@ -97,14 +97,14 @@ int main ()
     res = scanf("%lu", &N);
     assert (res);
 
-    struct buffer *buf = calloc (1, sizeof (struct buffer));
+    struct buffer *buf = TextInput (N);
     assert (buf);
-    TextInput (N);
+    
 
     HashT = HashTableInit (START_SIZE_OF_HASH_TABLE, HashNode, NodesCmp);
     //printf ("fill\n");
     FillHashtable (HashT, buf);
-    //HashTDump (HashT, "dump.png");
+    HashTDump (HashT, buf, "dump.png");
     //printf("numb\n");
     printf ("%lu\n", NumberOfFour (buf, HashT));
 

@@ -12,8 +12,8 @@ DEBUG = -g
 
 
 all: HWH
-HWH: MAIN_T HT_T
-	$(CC) $(CFLAGS) $(OPTIMISATION) $(DEBUG) main.o hashtable.o -o HWH.out
+HWH: MAIN_T HT_T DUMP_T
+	$(CC) $(CFLAGS) $(OPTIMISATION) $(DEBUG) main.o hashtable.o dump.o -o HWH.out
 MAIN_T:
 	$(CC) $(CFLAGS) $(OPTIMISATION) $(DEBUG) -c main.c
 HT_T:
