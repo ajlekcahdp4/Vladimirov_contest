@@ -4,5 +4,4 @@
 *.dot
 .vscode
 vgcore.*
-*.x
 *.dis
