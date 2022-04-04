@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 
 
@@ -72,11 +73,9 @@ enum opcode_t get_inout (unsigned data)
     case 1:
         return OUT;
     default:
-        fprintf (stderr, "ERROR\n");
-        exit(0);
+        fprintf (stderr, "ERROR: Unknown INOUT %X\n", Opc);
+        exit (0);
     }
-    fprintf (stderr, "ERROR: Unknown INOUT %X\n", Opc);
-    exit (0);
 }
 
 int get_reg_s (struct lex_array_t *lex, enum reg_t reg, size_t *ip)
@@ -170,7 +169,6 @@ int decode (unsigned data, struct lex_array_t *lex, size_t *ip)
         lex->lexarr[*ip + 1].kind = VAL;
         lex->lexarr[*ip + 1].lex.val = get_imm (data);
         *ip += 2;
-        lex->size += 2;
         return 0;
     }
     else if (is_in_out (data))
@@ -182,13 +180,11 @@ int decode (unsigned data, struct lex_array_t *lex, size_t *ip)
         *ip += 1;
         get_reg_s (lex, arg0, ip);
         *ip += 1;
-        lex->size += 2;
         return 0;
     }
     else
     {
         decode_arith (lex, data, ip);
-        lex->size += 3;
         return 0;
     }
 }
@@ -264,12 +260,13 @@ void print_lex (struct lex_array_t *lex)
 
 }
 
-#define MAXLEN 1000
+#define MAXLEN 4096
 struct lex_array_t *Lexer (char *filename)
 {
     int res = 0;
     unsigned data = 0;
     size_t buf_ip = 0;
+    size_t ip = 0; 
     struct stat bufF;
     int len = 0;
     struct lex_array_t *lex = NULL;
@@ -282,7 +279,7 @@ struct lex_array_t *Lexer (char *filename)
     len = bufF.st_size;
     buf = calloc (len + 1, sizeof (unsigned char));
     assert (buf);
-    fread (buf, sizeof (unsigned char), len, file);
+    fread (buf, sizeof(char), len, file);
     fclose(file);
 
     lex = calloc (1, sizeof (struct lex_array_t));
@@ -293,14 +290,17 @@ struct lex_array_t *Lexer (char *filename)
 
 
     
-    for ( size_t ip = 0; ; )
+    for (ip = 0; ; )
     {
-        res = sscanf (buf + buf_ip, " %x", &data);
-        buf_ip += 5;
+        res = sscanf (buf + buf_ip, "%x", &data);
         if (res != 1)
             break;
+        while (!isspace (buf[buf_ip]) && buf[buf_ip] != '\0')
+            buf_ip += 1;
+        buf_ip += 1;
         decode (data, lex, &ip);
     }
+    lex->size = ip;
     free (buf);
     return lex;
 }
@@ -348,7 +348,7 @@ void RunCmd (struct lex_array_t *lex, size_t *ip, unsigned char *regs)
         {
             int val = 0;
             scanf ("%d", &val);
-            regs [lex->lexarr[*ip + 1].lex.REG] = val;
+            regs [lex->lexarr[*ip + 1].lex.REG] = (unsigned char)val;
             *ip += 2;
             break;
         }
@@ -389,7 +389,6 @@ void Processor (struct lex_array_t *lex)
 int main (int argc, char **argv)
 {
     struct lex_array_t *lex = Lexer (argv[argc - 1]);
-
     Processor (lex);
     return 0;
 }

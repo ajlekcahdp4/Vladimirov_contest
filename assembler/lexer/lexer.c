@@ -149,7 +149,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.CMD = MOVI;
         lex->size += 1;
         i += 4;
-        if (!isspace(buf[i]))
+        if (!isspace(buf[i]) && buf[i] != EOF && buf[i] != '\0')
         {
             fprintf(stderr, "ERROR: no space after command\n");
             exit(0);
@@ -161,7 +161,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.CMD = ADD;
         lex->size += 1;
         i += 3;
-        if (!isspace(buf[i]))
+        if (!isspace(buf[i]) && buf[i] != EOF && buf[i] != '\0')
         {
             fprintf(stderr, "ERROR: no space after command\n");
             exit(0);
@@ -173,7 +173,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.CMD = SUB;
         lex->size += 1;
         i += 3;
-        if (!isspace(buf[i]))
+        if (!isspace(buf[i]) && buf[i] != EOF && buf[i] != '\0')
         {
             fprintf(stderr, "ERROR: no space after command\n");
             exit(0);
@@ -185,7 +185,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.CMD = MUL;
         lex->size += 1;
         i += 3;
-        if (!isspace(buf[i]))
+        if (!isspace(buf[i]) && buf[i] != EOF && buf[i] != '\0')
         {
             fprintf(stderr, "ERROR: no space after command\n");
             exit(0);
@@ -197,7 +197,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.CMD = DIV;
         lex->size += 1;
         i += 3;
-        if (!isspace(buf[i]))
+        if (!isspace(buf[i]) && buf[i] != EOF && buf[i] != '\0')
         {
             fprintf(stderr, "ERROR: no space after command\n");
             exit(0);
@@ -209,7 +209,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.CMD = IN;
         lex->size += 1;
         i += 2;
-        if (!isspace(buf[i]))
+        if (!isspace(buf[i]) && buf[i] != EOF && buf[i] != '\0')
         {
             fprintf(stderr, "ERROR: no space after command\n");
             exit(0);
@@ -221,7 +221,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.CMD = OUT;
         lex->size += 1;
         i += 3;
-        if (!isspace(buf[i]))
+        if (!isspace(buf[i]) && buf[i] != EOF && buf[i] != '\0')
         {
             fprintf(stderr, "ERROR: no space after command\n");
             exit(0);
@@ -232,7 +232,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].kind = REG;
         lex->lexarr[ip].lex.REG = A;
         lex->size += 1;
-        if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != '\n')
+        if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != EOF)
         {
             fprintf(stderr, "ERROR: no space after register\n");
             exit(0);
@@ -246,7 +246,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.REG = B;
         lex->size += 1;
         i += 1;
-        if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != '\n')
+        if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != EOF)
         {
             fprintf(stderr, "ERROR: no space after register\n");
             exit(0);
@@ -260,7 +260,7 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.REG = C;
         lex->size += 1;
         i += 1;
-        if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != '\n')
+        if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != EOF)
         {
             fprintf(stderr, "ERROR: no space after register\n");
             exit(0);
@@ -274,9 +274,8 @@ size_t lex_insert (struct lex_array_t *lex, const char *buf, size_t old_i, size_
         lex->lexarr[ip].lex.REG = D;
         lex->size += 1;
         i += 1;
-        if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != '\n')
+        if (!isspace(buf[i]) && buf[i] != ',' && buf[i] != '\0' && buf[i] != EOF)
         {
-            printf ("\n<%d>\n", buf[i]);
             fprintf(stderr, "ERROR: no space after register\n");
             exit(0);
         }

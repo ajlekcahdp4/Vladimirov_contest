@@ -16,9 +16,9 @@ MAIN_T:
 	$(CC) -c $(DEBUG) $(CFLAGS) AS.c
 
 LEXER_T:
-	$(CC) -c $(DEBUG) $(CFLAGS) lexer.c
+	$(CC) -c $(DEBUG) $(CFLAGS) lexer/lexer.c
 PARSER_T:
-	$(CC) -c $(DEBUG) $(CFLAGS) parser.c
+	$(CC) -c $(DEBUG) $(CFLAGS) parser/parser.c
 clean:
 	rm -rf *.o *.out *.dis *.x vgcore.*
 
