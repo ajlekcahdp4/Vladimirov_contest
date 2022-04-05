@@ -46,6 +46,8 @@ int NodesCmp(struct buffer *buf, const struct node_t * const node1, const struct
 {
     assert (node1);
     assert (node2);
+    assert (buf);
+
     int res = 0;
     unsigned ip11 = node1->ip1;
     unsigned ip12 = node1->ip2;
@@ -68,8 +70,8 @@ int NodesCmp(struct buffer *buf, const struct node_t * const node1, const struct
     free (temp_str_2);
     //--------------------------------------------------------------------------
 
-    printf ("1'st print node1 = %p, node1->ip1 = %u, node1->ip2 = %u\n", node1, node1->ip1, node1->ip2);
-    printf ("2'nd print node1 = %p, node1->ip1 = %u, node1->ip2 = %u\n", node1, node1->ip1, node1->ip2);
+    //printf ("1'st print node1 = %p, node1->ip1 = %u, node1->ip2 = %u\n", node1, node1->ip1, node1->ip2);
+    //printf ("2'nd print node1 = %p, node1->ip1 = %u, node1->ip2 = %u\n", node1, node1->ip1, node1->ip2);
     return res;
 }
 //==================================================================================
@@ -118,7 +120,7 @@ size_t ListCount (struct buffer *buf, struct node_t *top, struct node_t *aim_nod
     struct node_t *cur = top;
     while (cur)
     {
-        if (cur != top && NodesCmp (buf, cur, aim_node) == 0)
+        if (NodesCmp (buf, cur, aim_node) == 0)
             cnt += 1;
         cur = cur->next;
     }
@@ -180,8 +182,9 @@ void DeleteList (struct node_t* top)
         next_node = cur_node->next;
         free(cur_node);
         cur_node = next_node;
+        assert (cur_node);
     }
-    free(cur_node);
+    //free(cur_node);
 }
 
 //==================================================================================
@@ -198,7 +201,6 @@ struct Hashtable* HashTableInsert (struct Hashtable* HashT, struct buffer *buf, 
     }
 
     struct node_t *new_node = calloc (1, sizeof(struct node_t));
-    fflush (stdout);
     new_node->ip1 = ip1;
     new_node->ip2 = ip2;
 
@@ -228,6 +230,7 @@ struct Hashtable* HashTableInsert (struct Hashtable* HashT, struct buffer *buf, 
         {
             ListInsert (HashT->list_tail, new_node);
             HashT->list_tail = HashT->list_tail->next;
+
         }
         else
         {
@@ -309,10 +312,14 @@ size_t NumberOfFour (struct buffer *buf, struct Hashtable *HashT)
         if (HashT->lists_ar[i])
         {
             top = ListInit ();
+            assert (top);
             last = top;
 
             cur = HashT->lists_ar[i]->next;
-            cmp_node = cur;
+
+            cmp_node = calloc (1, sizeof (struct node_t));
+           cmp_node->ip1 = cur->ip1;
+            cmp_node->ip2 = cur->ip2;
 
             for (size_t j = 0; j < HashT->lists_ar[i]->capacity; j++)
             {
@@ -323,16 +330,21 @@ size_t NumberOfFour (struct buffer *buf, struct Hashtable *HashT)
                     runner = cur;
                     for (size_t k = 0; runner && k < HashT->lists_ar[i]->capacity; k++)
                     {
-                        printf ("\nk = %lu, runner->ip1 = %u, cmp_node->ip1 = %u\n", k, runner->ip1, cmp_node->ip1);
                         if (HashT->Cmp (buf, runner, cmp_node) == 0)
                             cnt += 1;
-                        printf ("k = %lu, runner->ip1 = %u, cmp_node->ip1 = %u\n", k, runner->ip1, cmp_node->ip1);
                         runner = runner->next;
                     }
                     if (cnt > 1)
                         numb_of_four += (cnt * (cnt - 1)) / 2;
                 }
-                cmp_node = cmp_node->next;
+                cur = cur->next;
+                if (cur)
+                {
+                    cmp_node = calloc (1, sizeof (struct node_t));
+                    cmp_node->ip1 = cur->ip1;
+                    cmp_node->ip2 = cur->ip2;
+                }
+
             }
             DeleteList (top);
         }

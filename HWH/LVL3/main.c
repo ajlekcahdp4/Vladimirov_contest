@@ -79,6 +79,7 @@ void End (struct Hashtable* HashT, struct buffer *buf)
         if (buf->str_array[i] != 0)
             free (buf->str_array[i]);
     }
+    free (buf->str_array);
     free(buf);
 }
 
@@ -102,10 +103,8 @@ int main ()
     
 
     HashT = HashTableInit (START_SIZE_OF_HASH_TABLE, HashNode, NodesCmp);
-    //printf ("fill\n");
     FillHashtable (HashT, buf);
-    HashTDump (HashT, buf, "dump.png");
-    //printf("numb\n");
+    //HashTDump (HashT, buf, "dump.png");
     printf ("%lu\n", NumberOfFour (buf, HashT));
 
 

@@ -23,4 +23,4 @@ DUMP_T:
 TestGen:
 	python3 tests/TestGen.py
 clean:
-	rm -rf *.o *.out *.png *.dot *.dis *.x
+	rm -rf *.o *.out *.png *.dot *.dis *.x vgcore.*
