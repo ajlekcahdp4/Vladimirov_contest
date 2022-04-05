@@ -11,6 +11,7 @@ struct buffer
 };
 
 
+
 struct Hashtable *FillHashtable (struct Hashtable *HashT, struct buffer *buf);
 int NodesCmp (struct buffer *buf, const struct node_t *node1, const struct node_t *node2);
 unsigned long long HashNode (struct buffer *buf, struct node_t *node);

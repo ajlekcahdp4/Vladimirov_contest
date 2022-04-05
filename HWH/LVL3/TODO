@@ -10,3 +10,4 @@
     - Rewrite HashTableResize   ( done 04.04 )
     - Rewrite Dump              ( done 04.04 )
     - Debugging
+        - Find invalid free

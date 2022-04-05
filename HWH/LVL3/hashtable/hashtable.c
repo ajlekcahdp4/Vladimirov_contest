@@ -42,7 +42,7 @@ struct Hashtable* HashTableInsert (struct Hashtable* HashT, struct buffer *buf, 
 //==================================================================================
 #define MAX_STR_LEN 128
 
-int NodesCmp(struct buffer *buf, const struct node_t *node1, const struct node_t *node2)
+int NodesCmp(struct buffer *buf, const struct node_t * const node1, const struct node_t *node2)
 {
     assert (node1);
     assert (node2);
