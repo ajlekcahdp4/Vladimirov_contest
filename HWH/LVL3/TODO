@@ -1,6 +1,6 @@
 - Rewrite hashtable to one buffer with strings and Hashtable, containing indexes
-    - Rewrite struct Hashtable ( done 03.04 )
-    - Rewrite HashtableInsert ( done 03.04 )
+    - Rewrite struct Hashtable  ( done 03.04 )
+    - Rewrite HashtableInsert   ( done 03.04 )
     - Rewrite list functions:
         - Rewrite ListInsert    ( done 04.04 )
         - Rewrite ListCnt       ( done 04.04 )
@@ -10,4 +10,5 @@
     - Rewrite HashTableResize   ( done 04.04 )
     - Rewrite Dump              ( done 04.04 )
     - Debugging
-        - Find invalid free
+        - Find invalid free     ( done 05.04 )
+        - Solve leaks
