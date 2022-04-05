@@ -23,7 +23,7 @@ struct Hashtable {
     unsigned long long size;
     unsigned long long inserts;
     unsigned long long (*HashFunc)(struct buffer*, struct node_t*);
-    int (*Cmp)(struct buffer*, struct node_t*, struct node_t*);
+    int (*Cmp) (struct buffer *buf, const struct node_t *node1, const struct node_t *node2);
 };
 
 struct node_t *ListInit (void);
@@ -42,21 +42,34 @@ struct Hashtable* HashTableInsert (struct Hashtable* HashT, struct buffer *buf, 
 //==================================================================================
 #define MAX_STR_LEN 128
 
-int NodesCmp (struct buffer *buf, struct node_t *node1, struct node_t *node2)
+int NodesCmp(struct buffer *buf, const struct node_t *node1, const struct node_t *node2)
 {
+    assert (node1);
+    assert (node2);
     int res = 0;
+    unsigned ip11 = node1->ip1;
+    unsigned ip12 = node1->ip2;
+    unsigned ip21 = node2->ip1;
+    unsigned ip22 = node2->ip2;
+    //--------------------------------------------------------------------------
     char *temp_str_1 = calloc (MAX_STR_LEN, sizeof(char));
     char *temp_str_2 = calloc (MAX_STR_LEN, sizeof(char));
-    strcat (temp_str_1, buf->str_array[node1->ip1]);
-    strcat (temp_str_1, buf->str_array[node1->ip2]);
+    assert (temp_str_1);
+    assert (temp_str_2);
 
-    strcat (temp_str_2, buf->str_array[node2->ip1]);
-    strcat (temp_str_2, buf->str_array[node2->ip2]);
+    strcat (temp_str_1, buf->str_array[ip11]);
+    strcat (temp_str_1, buf->str_array[ip12]);
+
+    strcat (temp_str_2, buf->str_array[ip21]);
+    strcat (temp_str_2, buf->str_array[ip22]);
 
     res = strcmp (temp_str_1, temp_str_2);
-    
     free (temp_str_1);
     free (temp_str_2);
+    //--------------------------------------------------------------------------
+
+    printf ("1'st print node1 = %p, node1->ip1 = %u, node1->ip2 = %u\n", node1, node1->ip1, node1->ip2);
+    printf ("2'nd print node1 = %p, node1->ip1 = %u, node1->ip2 = %u\n", node1, node1->ip1, node1->ip2);
     return res;
 }
 //==================================================================================
@@ -185,6 +198,7 @@ struct Hashtable* HashTableInsert (struct Hashtable* HashT, struct buffer *buf, 
     }
 
     struct node_t *new_node = calloc (1, sizeof(struct node_t));
+    fflush (stdout);
     new_node->ip1 = ip1;
     new_node->ip2 = ip2;
 
@@ -227,7 +241,8 @@ struct Hashtable* HashTableInsert (struct Hashtable* HashT, struct buffer *buf, 
 }
 //==================================================================================
 
-struct Hashtable* HashTableInit (size_t size, unsigned long long (*HashFunc)(struct buffer*, struct node_t*), int (*Cmp)(struct buffer*, struct node_t*, struct node_t*))
+struct Hashtable* HashTableInit (size_t size, unsigned long long (*HashFunc)(struct buffer*, struct node_t*), \
+    int (*Cmp)(struct buffer *buf, const struct node_t *node1, const struct node_t *node2))
 {
     assert (size);
     struct Hashtable* HashT = calloc (1, sizeof(struct Hashtable));
@@ -305,11 +320,13 @@ size_t NumberOfFour (struct buffer *buf, struct Hashtable *HashT)
                 {
                     last = ListInsert (last, cmp_node);
                     cnt  = 0;
-                    runner = HashT->lists_ar[i]->next;
+                    runner = cur;
                     for (size_t k = 0; runner && k < HashT->lists_ar[i]->capacity; k++)
                     {
+                        printf ("\nk = %lu, runner->ip1 = %u, cmp_node->ip1 = %u\n", k, runner->ip1, cmp_node->ip1);
                         if (HashT->Cmp (buf, runner, cmp_node) == 0)
                             cnt += 1;
+                        printf ("k = %lu, runner->ip1 = %u, cmp_node->ip1 = %u\n", k, runner->ip1, cmp_node->ip1);
                         runner = runner->next;
                     }
                     if (cnt > 1)
