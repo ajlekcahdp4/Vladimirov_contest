@@ -20,5 +20,5 @@ LEXER_T:
 PARSER_T:
 	$(CC) -c $(DEBUG) $(CFLAGS) parser/parser.c
 clean:
-	rm -rf *.o *.out *.dis *.x vgcore.*
+	rm -rf *.o *.out vgcore.*
 
