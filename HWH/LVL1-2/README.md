@@ -2,7 +2,7 @@
 First two levels of the task. (make Hashtable of strings for search number of words in text)
 ## to copy this problem run:
 ```
-git clone https://github.com/ajlekcahdp4/Vladimirov_contest
+git clone https://github.com/ajlekcahdp4/c-graduate.git
 cd Vladimirov_contest/HWH/LVL1-2
 ```
 ## To compile this program run:
