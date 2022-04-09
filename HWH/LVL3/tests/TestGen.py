@@ -29,7 +29,7 @@ def GenerateTest (words, N1, text2, N2):
     test = []
     words_index_list = []
 
-    test_len = rand.randint (3, N2)
+    test_len = rand.randint (3, 15000)
     answ = rand.randint (3, 100)
 
     print ("test_len = " + str(test_len + 4*answ))
@@ -67,7 +67,7 @@ second_text = []
 N1 = FileToBuf ("tests/src/1.src", first_text)
 N2 = FileToBuf ("tests/src/3.src", second_text)
 
-test_file = open ("tests/dat/6.dat", "w")
+test_file = open ("tests/dat/7.dat", "w")
 
 #---------------------------get_text------------------------------
 words = CrushingWords (first_text, N1)

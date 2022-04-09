@@ -69,9 +69,6 @@ int NodesCmp(struct buffer *buf, const struct node_t * const node1, const struct
     free (temp_str_1);
     free (temp_str_2);
     //--------------------------------------------------------------------------
-
-    //printf ("1'st print node1 = %p, node1->ip1 = %u, node1->ip2 = %u\n", node1, node1->ip1, node1->ip2);
-    //printf ("2'nd print node1 = %p, node1->ip1 = %u, node1->ip2 = %u\n", node1, node1->ip1, node1->ip2);
     return res;
 }
 //==================================================================================
@@ -267,13 +264,17 @@ struct Hashtable* HashTableInit (size_t size, unsigned long long (*HashFunc)(str
 
 struct Hashtable* HashTableResize (struct Hashtable* HashT, struct buffer *buf)
 {
-    for (unsigned long long int i = 0; i < HashT->size; i++)
-        if(HashT->lists_ar[i] != 0)
-            free (HashT->lists_ar[i]);
+    size_t hasht_size = HashT->size;
+    for (unsigned long long int i = 0; i < hasht_size; i++)
+    {
+        struct Hashtable_elem *hasht_elem = HashT->lists_ar[i];
+        if(hasht_elem != 0)
+            free (hasht_elem);
+    }
     free (HashT->lists_ar);
     
     
-    HashT-> size *= 2;
+    HashT->size *= 2;
     HashT->lists_ar = calloc (HashT->size, sizeof (struct node_t*));
 
     struct node_t *last = HashT->list_tail;
@@ -388,7 +389,7 @@ void HashTDump (struct Hashtable *HashT, struct buffer *buf, char *name)
     memcpy (command, "dot dump.dot -T png -o ", 23 * sizeof(char));
     strcat (command, name);
     system (command);
-    //system ("rm dump.dot");
+    system ("rm dump.dot");
     free (command);
 }
 
@@ -396,9 +397,10 @@ void HashTDump (struct Hashtable *HashT, struct buffer *buf, char *name)
 //==================================================================================
 struct Hashtable *FillHashtable (struct Hashtable *HashT, struct buffer *buf)
 {
-    for (unsigned first = 0; first < buf->size; first++)
+    size_t buf_size = buf->size;
+    for (unsigned first = 0; first < buf_size; first++)
     {
-        for (unsigned second = 0; second < buf->size; second++)
+        for (unsigned second = 0; second < buf_size; second++)
         {
             if (first != second)
                 HashTableInsert (HashT, buf, first, second);
