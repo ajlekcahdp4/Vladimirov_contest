@@ -14,7 +14,7 @@ struct buffer *BufferResize (struct buffer *buf);
 //====================================FUNCTIONS=====================================
 //==================================================================================
 
-#define MAX_STR_LEN 128
+#define MAX_STR_LEN 20
 size_t ReadWord (char **temp_str)
 {
     *temp_str = calloc (MAX_STR_LEN, sizeof(char));
@@ -45,7 +45,7 @@ struct buffer *BufferResize (struct buffer *buf)
 }
 
 
-#define START_BUFFER_CAPACITY 1024
+#define START_BUFFER_CAPACITY 128
 struct buffer *TextInput (size_t N)
 {
     char  *temp_str = NULL;
@@ -104,7 +104,6 @@ int main ()
 
     HashT = HashTableInit (START_SIZE_OF_HASH_TABLE, HashNode, NodesCmp);
     FillHashtable (HashT, buf);
-    //HashTDump (HashT, buf, "dump.png");
     printf ("%lu\n", NumberOfFour (buf, HashT));
 
 

@@ -40,7 +40,7 @@ struct Hashtable* HashTableInsert (struct Hashtable* HashT, struct buffer *buf, 
 //==================================================================================
 //=================================STRUCT_FUNCTIONS=================================
 //==================================================================================
-#define MAX_STR_LEN 128
+#define MAX_STR_LEN 32
 
 int NodesCmp(struct buffer *buf, const struct node_t * const node1, const struct node_t *node2)
 {
@@ -184,7 +184,7 @@ void DeleteList (struct node_t* top)
         cur_node = next_node;
         assert (cur_node);
     }
-    //free(cur_node);
+    free(cur_node);
 }
 
 //==================================================================================
@@ -299,36 +299,42 @@ struct Hashtable* HashTableResize (struct Hashtable* HashT, struct buffer *buf)
 
 size_t NumberOfFour (struct buffer *buf, struct Hashtable *HashT)
 {
-    size_t numb_of_four = 0;
-    size_t cnt          = 0;
+    size_t numb_of_four     = 0;
+    size_t cnt              = 0;
+    size_t bucket_capacity  = 0;
+    size_t hasht_size       = 0;
     struct node_t *top      = NULL;
     struct node_t *last     = NULL;
     struct node_t *cmp_node = NULL;
     struct node_t *cur      = NULL;
     struct node_t *runner   = NULL;
-
-    for (size_t i = 0; i < HashT->size; i++)
+    struct Hashtable_elem *cur_bucket = NULL;
+    
+    hasht_size = HashT->size;   
+    for (size_t i = 0; i < hasht_size; i++)
     {   
-        if (HashT->lists_ar[i])
+        cur_bucket = HashT->lists_ar[i];
+        if (cur_bucket)
         {
             top = ListInit ();
             assert (top);
             last = top;
 
-            cur = HashT->lists_ar[i]->next;
-
+            cur = cur_bucket->next;
+            
             cmp_node = calloc (1, sizeof (struct node_t));
-           cmp_node->ip1 = cur->ip1;
+            cmp_node->ip1 = cur->ip1;
             cmp_node->ip2 = cur->ip2;
 
-            for (size_t j = 0; j < HashT->lists_ar[i]->capacity; j++)
+            bucket_capacity = cur_bucket->capacity;
+            for (size_t j = 0; j < bucket_capacity; j++)
             {
                 if (ListCount (buf, top, cmp_node) == 0)
                 {
                     last = ListInsert (last, cmp_node);
                     cnt  = 0;
                     runner = cur;
-                    for (size_t k = 0; runner && k < HashT->lists_ar[i]->capacity; k++)
+                    for (size_t k = 0; runner && k < bucket_capacity; k++)
                     {
                         if (HashT->Cmp (buf, runner, cmp_node) == 0)
                             cnt += 1;
@@ -340,9 +346,10 @@ size_t NumberOfFour (struct buffer *buf, struct Hashtable *HashT)
                 cur = cur->next;
                 if (cur)
                 {
-                    cmp_node = calloc (1, sizeof (struct node_t));
-                    cmp_node->ip1 = cur->ip1;
-                    cmp_node->ip2 = cur->ip2;
+                    cmp_node->next = calloc (1, sizeof (struct node_t));
+                    cmp_node->next->ip1 = cur->ip1;
+                    cmp_node->next->ip2 = cur->ip2;
+                    cmp_node = cmp_node->next;
                 }
 
             }
