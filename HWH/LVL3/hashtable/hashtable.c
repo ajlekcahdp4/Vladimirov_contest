@@ -20,10 +20,10 @@ struct Hashtable {
     struct Hashtable_elem **lists_ar;
     struct node_t  *list_head;
     struct node_t  *list_tail;
-    unsigned long long size;
-    unsigned long long inserts;
     unsigned long long (*HashFunc)(struct buffer*, struct node_t*);
     int (*Cmp) (struct buffer *buf, const struct node_t *node1, const struct node_t *node2);
+    unsigned size;
+    unsigned inserts;
 };
 
 struct node_t *ListInit (void);
@@ -251,7 +251,7 @@ struct Hashtable* HashTableInit (size_t size, unsigned long long (*HashFunc)(str
     assert (HashT);
     assert (HashT->lists_ar);
     assert (HashT->list_head);
-    HashT->size      = size;
+    HashT->size      = (unsigned)size;
     HashT->HashFunc = HashFunc;
     HashT->Cmp = Cmp;
     HashT->list_tail = HashT->list_head;
@@ -264,7 +264,7 @@ struct Hashtable* HashTableInit (size_t size, unsigned long long (*HashFunc)(str
 
 struct Hashtable* HashTableResize (struct Hashtable* HashT, struct buffer *buf)
 {
-    size_t hasht_size = HashT->size;
+    unsigned hasht_size = HashT->size;
     for (unsigned long long int i = 0; i < hasht_size; i++)
     {
         struct Hashtable_elem *hasht_elem = HashT->lists_ar[i];
@@ -278,7 +278,7 @@ struct Hashtable* HashTableResize (struct Hashtable* HashT, struct buffer *buf)
     HashT->lists_ar = calloc (HashT->size, sizeof (struct node_t*));
 
     struct node_t *last = HashT->list_tail;
-    unsigned long long old_inserts = HashT->inserts;
+    unsigned old_inserts = HashT->inserts;
     struct node_t* cur = HashT->list_head;
     //+++++++++++++++++++++++++++++++++++++++++
     while (cur->next != last)
