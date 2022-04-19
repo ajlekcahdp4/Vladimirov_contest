@@ -141,18 +141,20 @@ int HashtableInsert(struct Hashtable *HashT, int m, int val)
     }
     else
     {
-        if (HashT->lists_ar[hash]->prev)
-            HashT->lists_ar[hash]->prev->next = HashT->lists_ar[hash]->next;
-        if (HashT->lists_ar[hash]->next)
-            HashT->lists_ar[hash]->next->prev = HashT->lists_ar[hash]->prev;
-        else
-            HashT->list_tail = HashT->list_tail->prev;
+        if (HashT->lists_ar[hash] != HashT->list_head)
+        {
+            if (HashT->lists_ar[hash]->prev)
+                HashT->lists_ar[hash]->prev->next = HashT->lists_ar[hash]->next;
+            if (HashT->lists_ar[hash]->next)
+                HashT->lists_ar[hash]->next->prev = HashT->lists_ar[hash]->prev;
+            else
+                HashT->list_tail = HashT->list_tail->prev;
 
-        HashT->lists_ar[hash]->next = HashT->list_head;
-        HashT->lists_ar[hash]->prev = NULL;
-        HashT->list_head->prev = HashT->lists_ar[hash];
-        HashT->list_head = HashT->lists_ar[hash];
-
+            HashT->lists_ar[hash]->next = HashT->list_head;
+            HashT->lists_ar[hash]->prev = NULL;
+            HashT->list_head->prev = HashT->lists_ar[hash];
+            HashT->list_head = HashT->lists_ar[hash];
+        }
         hits = 1;
     }
     return hits;
@@ -229,6 +231,7 @@ int RequestInput(struct Hashtable *HashT, int m, int n)
     return hits;
 }
 
+#define MAGIC_NUMBER ((size_t)1000000)
 int main()
 {
     int res = 0;
@@ -242,7 +245,7 @@ int main()
     res = scanf("%d", &n);
     assert(res);
 
-    HashT = HashTableInit((size_t)n + 1, hash);
+    HashT = HashTableInit(MAGIC_NUMBER, hash);
 
     hits = RequestInput(HashT, m, n);
 

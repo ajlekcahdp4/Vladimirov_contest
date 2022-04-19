@@ -6,43 +6,41 @@
 
 
 
-int RequestInput (struct Hashtable* HashT, int m, int n)
+int RequestInput(struct Hashtable *HashT, int m, int n)
 {
     int request = 0;
-    int res     = 0;
-    int hits    = 0;
-    for (size_t i = 0; i < n; i++)
+    int res = 0;
+    int hits = 0;
+    for (int i = 0; i < n; i++)
     {
-        res = scanf ("%d", &request);
-        assert (res);
-        hits += HashtableInsert (HashT, m, request);
+        res = scanf("%d", &request);
+        assert(res);
+        hits += HashtableInsert(HashT, m, request);
     }
     return hits;
 }
 
+#define MAGIC_NUMBER ((size_t)1000000)
 
-
-
-int main ()
+int main()
 {
-    int res   = 0;
-    int m     = 0;
-    int n     = 0;
-    int hits  = 0;
-    struct Hashtable* HashT = NULL;
-    char** words            = NULL;
+    int res = 0;
+    int m = 0;
+    int n = 0;
+    int hits = 0;
+    struct Hashtable *HashT = NULL;
 
     res = scanf("%d", &m);
-    assert (res);
+    assert(res);
     res = scanf("%d", &n);
-    assert (res);
-        
-    HashT = HashTableInit ((size_t)n + 1, hash);
+    assert(res);
 
-    hits = RequestInput (HashT, m, n);
-    
-    printf ("%d\n", hits);
-    
-    DeleteHastable (HashT);
+    HashT = HashTableInit(MAGIC_NUMBER, hash);
+
+    hits = RequestInput(HashT, m, n);
+
+    printf("%d\n", hits);
+
+    DeleteHastable(HashT);
     return 0;
-}
+};
